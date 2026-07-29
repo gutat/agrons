@@ -15,4 +15,11 @@ export default defineNuxtConfig({
       defaultTheme: "system",
     },
   },
+
+  nitro: {
+    preset: "static",
+    prerender: {
+      routes: ["/"],
+    },
+  },
 });
