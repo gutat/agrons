@@ -5,8 +5,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseKey: process.env.SUPABASE_KEY,
+      supabaseUrl: process.env.SUPABASE_URL || "https://kulobdwegcyjtoeancet.supabase.co",
+      supabaseKey: process.env.SUPABASE_KEY || "sb_publishable__KJNmpoQK7dmhVxZqqTsgA_X1EJ_aji",
       appUrl: "",
       whatsappNumber: "",
       whatsappMessage: "",
