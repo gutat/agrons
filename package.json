@@ -10,8 +10,14 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@pinia/nuxt": "^1.0.1",
     "@supabase/supabase-js": "^2.111.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vueuse/core": "^14.4.0",
+    "@vueuse/motion": "^3.0.3",
+    "@vueuse/nuxt": "^14.4.0",
     "nuxt": "^4.5.1",
+    "swiper": "^14.0.7",
     "vue": "^3.5.40",
     "vue-router": "^5.2.0"
   }

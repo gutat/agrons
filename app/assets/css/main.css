@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/* ===== Design Tokens ===== */
+@theme {
+  /* Colors */
+  --color-primary: #1B3022;
+  --color-primary-light: #B4CDB8;
+  --color-surface: #F7FAFB;
+  --color-surface-dim: #D7DADB;
+  --color-surface-container: #EBEEEF;
+  --color-surface-container-high: #E6E9EA;
+  --color-secondary: #7E562E;
+  --color-secondary-light: #F1BC8C;
+  --color-on-surface: #181C1D;
+  --color-on-surface-variant: #434843;
+  --color-outline: #737973;
+  --color-error: #BA1A1A;
+
+  /* Dark mode colors */
+  --color-dark-surface: #121414;
+  --color-dark-surface-container: #1E2021;
+  --color-dark-on-surface: #EEF1F2;
+  --color-dark-outline: #8D938D;
+
+  /* Typography */
+  --font-display: "Source Serif 4", serif;
+  --font-body: "Hanken Grotesk", sans-serif;
+
+  /* Spacing */
+  --spacing-container: 1280px;
+  --spacing-gutter: 24px;
+  --spacing-section-gap: 120px;
+}
+
+/* ===== Root & Body ===== */
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body {
+  height: 100%;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+}
+
+/* Dark mode */
+.dark body {
+  background-color: var(--color-dark-surface);
+  color: var(--color-dark-on-surface);
+}
+
+/* ===== Scroll Snap Sections ===== */
+.section {
+  height: 100vh;
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding: var(--spacing-section-gap) 0;
+}
+
+/* ===== Glassmorphism ===== */
+.glass {
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(115, 121, 115, 0.1);
+}
+
+.dark .glass {
+  border-color: rgba(141, 141, 141, 0.1);
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .section {
+    scroll-snap-stop: normal;
+  }
+}
+
+/* ===== Typography Classes ===== */
+.display-lg {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 72px;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 640px) {
+  .display-lg {
+    font-size: 40px;
+    line-height: 48px;
+    letter-spacing: -0.01em;
+  }
+}
+
+.headline-md {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 40px;
+}
+
+.body-lg {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+.body-md {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.label-caps {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
