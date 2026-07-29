@@ -1,102 +1,179 @@
 <script setup lang="ts">
-import { createClient } from '@supabase/supabase-js'
-
-const config = useRuntimeConfig()
-const supabase = createClient(config.public.supabaseUrl, config.public.supabaseKey)
-
-const form = reactive({
-  name: '',
-  email: '',
-  company: '',
-  phone: '',
-  message: '',
-})
-const submitting = ref(false)
-const submitted = ref(false)
-
-async function submitForm() {
-  submitting.value = true
-  const { error } = await supabase.from('contact_submissions').insert([{
-    name: form.name,
-    email: form.email,
-    company: form.company || null,
-    phone: form.phone || null,
-    message: form.message,
-    inquiry_type: 'general',
-    source: 'website',
-  }])
-  submitting.value = false
-  if (!error) {
-    submitted.value = true
-    form.name = ''; form.email = ''; form.company = ''; form.phone = ''; form.message = ''
-  }
-}
+import Section from "~/components/common/Section.vue";
+import Button from "~/components/common/Button.vue";
+import LightPillar from "~/components/bits/LightPillar.vue";
+import BlurText from "~/components/bits/BlurText.vue";
 </script>
 
 <template>
-  <Section id="contact">
-    <div class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full">
-      <h2 class="headline-md text-[var(--color-primary)] text-center mb-2">Contact Us</h2>
-      <p class="body-md text-[var(--color-on-surface-variant)] text-center mb-8">Get in touch for inquiries and partnerships</p>
-
-      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <!-- Contact Info -->
-        <div class="glass rounded-xl p-8 bg-white/50 dark:bg-white/5">
-          <h3 class="font-semibold text-[var(--color-primary)] mb-4">Get in Touch</h3>
-          <div class="space-y-4">
-            <div>
-              <p class="label-caps text-[var(--color-secondary)]">Address</p>
-              <p class="body-md text-[var(--color-on-surface-variant)]">Medan Industrial Estate, Indonesia</p>
-            </div>
-            <div>
-              <p class="label-caps text-[var(--color-secondary)]">Email</p>
-              <p class="body-md text-[var(--color-on-surface-variant)]">export@agronusa.co.id</p>
-            </div>
-            <div>
-              <p class="label-caps text-[var(--color-secondary)]">WhatsApp</p>
-              <a href="https://wa.me/6281234567890" target="_blank" class="body-md text-[var(--color-primary)] no-underline hover:underline">+62 812 3456 7890</a>
-            </div>
-          </div>
-          <Button variant="whatsapp" size="md" class="mt-6 w-full justify-center" href="https://wa.me/6281234567890">
-            Chat on WhatsApp
-          </Button>
+    <Section id="contact" dark class="relative overflow-hidden">
+        <!-- Dark background for LightPillar visibility -->
+        <div class="absolute inset-0 z-0 !bg-[var(--color-charcoal)]">
+            <LightPillar
+                top-color="#1B3022"
+                bottom-color="#4A7A5A"
+                :intensity="1.0"
+                :rotation-speed="0.3"
+                :glow-amount="0.005"
+                :pillar-width="3.0"
+                :pillar-height="0.4"
+                :noise-intensity="0.5"
+                :pillar-rotation="0"
+                :interactive="false"
+            />
         </div>
 
-        <!-- Contact Form -->
-        <div class="glass rounded-xl p-8 bg-white/50 dark:bg-white/5">
-          <h3 class="font-semibold text-[var(--color-primary)] mb-4">Send a Message</h3>
-          <form v-if="!submitted" @submit.prevent="submitForm" class="space-y-4">
-            <div>
-              <label class="label-caps text-[var(--color-secondary)] block mb-1">Name *</label>
-              <input v-model="form.name" required class="w-full px-4 py-2 rounded-lg border border-[var(--color-outline)] bg-transparent focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-colors" />
+        <div
+            class="relative z-10 max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full h-full flex flex-col items-center justify-center"
+        >
+            <!-- Numbered Header -->
+            <div class="section-header animate-entry flex-shrink-0">
+                <span class="section-number"
+                    >04 &mdash; Contact</span
+                >
+                <span class="section-divider" />
             </div>
-            <div>
-              <label class="label-caps text-[var(--color-secondary)] block mb-1">Email *</label>
-              <input v-model="form.email" type="email" required class="w-full px-4 py-2 rounded-lg border border-[var(--color-outline)] bg-transparent focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-colors" />
+
+            <!-- Section Title -->
+            <div class="animate-entry delay-1 flex-shrink-0 text-center">
+                text-left">
+                <BlurText
+                    text="Get in Touch"
+                    className="headline-md mb-3"
+                    :delay="60"
+                    :step-duration="0.3"
+                    animate-by="words"
+                    direction="bottom"
+                />
+                <BlurText
+                    text="Reach out for inquiries, sample requests, or partnership opportunities."
+                    className="body-md max-w-lg leading-relaxed"
+                    :delay="80"
+                    :step-duration="0.25"
+                    animate-by="words"
+                    direction="bottom"
+                />
             </div>
-            <div>
-              <label class="label-caps text-[var(--color-secondary)] block mb-1">Company</label>
-              <input v-model="form.company" class="w-full px-4 py-2 rounded-lg border border-[var(--color-outline)] bg-transparent focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-colors" />
+
+            <!-- Contact Info - Centered, Full Width -->
+            <div
+                class="animate-entry delay-2 mt-6 md:mt-10 w-full max-w-lg mx-auto"
+            >
+                <div
+                    class="card !p-6 md:!p-8 !bg-white/10 !backdrop-blur-md !border-white/10"
+                >
+                    <div class="space-y-4 md:space-y-5">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-[var(--color-husk-muted)] dark:bg-white/10 flex items-center justify-center flex-shrink-0"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 256 256"
+                                    class="fill-[var(--color-husk)] dark:fill-[var(--color-husk-light)]"
+                                >
+                                    <path
+                                        d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"
+                                    />
+                                </svg>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-xs font-bold uppercase tracking-widest text-[var(--color-husk-light)]"
+                                >
+                                    Address
+                                </p>
+                                <p class="text-sm text-white/80 mt-0.5">
+                                    Medan Industrial Estate, Indonesia
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-[var(--color-forest-muted)] dark:bg-white/10 flex items-center justify-center flex-shrink-0"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 256 256"
+                                    class="fill-[var(--color-forest-light)]"
+                                >
+                                    <path
+                                        d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,127.72,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"
+                                    />
+                                </svg>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-xs font-bold uppercase tracking-widest text-[var(--color-husk-light)]"
+                                >
+                                    Email
+                                </p>
+                                <a
+                                    href="mailto:export@agronusa.co.id"
+                                    class="text-sm text-[var(--color-forest-light)] hover:underline mt-0.5 block"
+                                    >export@agronusa.co.id</a
+                                >
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-[#25D366]/10 flex items-center justify-center flex-shrink-0"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    fill="#25D366"
+                                    viewBox="0 0 256 256"
+                                >
+                                    <path
+                                        d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84Z"
+                                    />
+                                </svg>
+                            </div>
+                            <div>
+                                <p
+                                    class="text-xs font-bold uppercase tracking-widest text-[var(--color-husk-light)]"
+                                >
+                                    WhatsApp
+                                </p>
+                                <a
+                                    href="https://wa.me/6281234567890"
+                                    target="_blank"
+                                    class="text-sm text-[var(--color-forest-light)] hover:underline mt-0.5 block"
+                                    >+62 812 3456 7890</a
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-white/10">
+                        <Button
+                            variant="whatsapp"
+                            size="md"
+                            class="w-full justify-center"
+                            href="https://wa.me/6281234567890"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                viewBox="0 0 256 256"
+                            >
+                                <path
+                                    d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84Z"
+                                />
+                            </svg>
+                            Chat on WhatsApp
+                        </Button>
+                    </div>
+                </div>
             </div>
-            <div>
-              <label class="label-caps text-[var(--color-secondary)] block mb-1">Phone</label>
-              <input v-model="form.phone" type="tel" class="w-full px-4 py-2 rounded-lg border border-[var(--color-outline)] bg-transparent focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-colors" />
-            </div>
-            <div>
-              <label class="label-caps text-[var(--color-secondary)] block mb-1">Message *</label>
-              <textarea v-model="form.message" rows="3" required class="w-full px-4 py-2 rounded-lg border border-[var(--color-outline)] bg-transparent focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-colors resize-none"></textarea>
-            </div>
-            <Button type="submit" variant="primary" size="md" class="w-full justify-center" :loading="submitting" :disabled="submitting">
-              {{ submitting ? 'Sending...' : 'Send Message' }}
-            </Button>
-          </form>
-          <div v-else class="text-center py-8">
-            <p class="text-lg font-medium text-[var(--color-primary)]">Thank you!</p>
-            <p class="text-sm text-[var(--color-on-surface-variant)] mt-2">Your message has been sent. We'll get back to you soon.</p>
-            <Button variant="outline" size="sm" class="mt-4" @click="submitted = false">Send another</Button>
-          </div>
         </div>
-      </div>
-    </div>
-  </Section>
+    </Section>
 </template>

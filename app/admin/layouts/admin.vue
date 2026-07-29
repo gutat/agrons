@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { createClient } from '@supabase/supabase-js'
+import { useSupabase } from '~/utils/supabase'
+import AdminDashboard from '~/admin/components/AdminDashboard.vue'
+import AdminProducts from '~/admin/components/AdminProducts.vue'
+import AdminProductEditor from '~/admin/components/AdminProductEditor.vue'
+import AdminGallery from '~/admin/components/AdminGallery.vue'
+import AdminCompany from '~/admin/components/AdminCompany.vue'
+import AdminMessages from '~/admin/components/AdminMessages.vue'
 
-const config = useRuntimeConfig()
-const supabase = createClient(config.public.supabaseUrl, config.public.supabaseKey)
+const supabase = useSupabase()
 const adminPath = config.public.adminPath || 'admin'
 
 const props = defineProps<{

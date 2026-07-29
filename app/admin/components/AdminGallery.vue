@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { createClient } from '@supabase/supabase-js'
+import { useSupabase } from '~/utils/supabase'
 
-const config = useRuntimeConfig()
-const supabase = createClient(config.public.supabaseUrl, config.public.supabaseKey)
+const supabase = useSupabase()
 
 const items = ref<any[]>([])
 const loading = ref(true)

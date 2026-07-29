@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import AppHeader from '~/components/layout/AppHeader.vue'
+import AppFooter from '~/components/layout/AppFooter.vue'
+import CompanySection from '~/components/sections/CompanySection.vue'
+import ProductsSection from '~/components/sections/ProductsSection.vue'
+import GallerySection from '~/components/sections/GallerySection.vue'
+import ContactSection from '~/components/sections/ContactSection.vue'
+
 useHead({
   title: 'PT Agro Nusa Sejahtera',
   meta: [
@@ -12,7 +19,7 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="page-enter">
     <AppHeader />
     <main>
       <CompanySection />

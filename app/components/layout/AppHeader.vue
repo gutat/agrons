@@ -1,98 +1,157 @@
 <script setup lang="ts">
-import { useWindowScroll } from '@vueuse/core'
+import { useWindowScroll } from "@vueuse/core";
+import ThemeSwitcher from "~/components/layout/ThemeSwitcher.vue";
+import Button from "~/components/common/Button.vue";
+import StaggeredMenu from "~/components/bits/StaggeredMenu.vue";
+import GooeyNav from "~/components/bits/GooeyNav.vue";
 
-const { y: scrollY } = useWindowScroll()
-const scrolled = computed(() => scrollY.value > 50)
-const mobileMenuOpen = ref(false)
+const { y: scrollY } = useWindowScroll();
+const {
+    currentSection,
+    sectionIds,
+    scrollToSection,
+    setupScrollSpy,
+    setupEntryAnimations,
+} = useViewport();
 
-function scrollToSection(id: string) {
-  mobileMenuOpen.value = false
-  const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
+const scrolled = computed(() => false);
+
+function onNavClick(id: string) {
+    scrollToSection(sectionIds.indexOf(id));
 }
+
+setupScrollSpy();
+setupEntryAnimations();
+
+const menuItems = computed(() =>
+    sectionIds.map((id) => ({
+        label:
+            id === "company"
+                ? "About"
+                : id.charAt(0).toUpperCase() + id.slice(1),
+        ariaLabel: `Go to ${id} section`,
+        link: `#${id}`,
+    })),
+);
+
+const socialItems = [
+    { label: "WA", link: "https://wa.me/6281234567890" },
+    { label: "Email", link: "mailto:export@agronusa.co.id" },
+];
+
+const menuOpen = ref(false);
+
+function handleMenuClose() {
+    setTimeout(() => {
+        menuOpen.value = false;
+    }, 500);
+}
+
+// Inline logo SVG for StaggeredMenu
+const logoUrl = "/logo.png";
 </script>
 
 <template>
-  <header
-    :class="[
-      'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-      scrolled
-        ? 'bg-white/90 dark:bg-[var(--color-dark-surface)]/90 backdrop-blur-md shadow-sm'
-        : 'bg-transparent'
-    ]"
-  >
-    <div class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) h-16 flex items-center justify-between">
-      <!-- Logo -->
-      <a href="#company" class="flex items-center gap-2 no-underline" @click.prevent="scrollToSection('company')">
-        <span class="font-display text-lg font-bold text-[var(--color-primary)]">Agro Nusa</span>
-      </a>
+    <!-- Desktop Pill Nav -->
+    <header
+        :class="['nav-glass mx-auto max-w-(--spacing-container)', { scrolled }]"
+        style="
+            border-radius: 9999px;
+            background: color-mix(
+                in oklch,
+                var(--color-parchment) 25%,
+                transparent
+            );
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        "
+    >
+        <div
+            class="h-14 md:h-16 flex items-center justify-between px-4 md:px-6"
+        >
+            <a
+                href="#company"
+                class="flex items-center gap-2.5 no-underline select-none"
+                @click.prevent="onNavClick('company')"
+            >
+                <img src="/logo.png" alt="Agro Nusa" class="h-8 w-auto" />
+            </a>
 
-      <!-- Desktop Nav -->
-      <nav class="hidden md:flex items-center gap-6" aria-label="Main navigation">
-        <a
-          v-for="item in sectionIds"
-          :key="item"
-          :href="`#${item}`"
-          class="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors no-underline capitalize label-caps"
-          @click.prevent="scrollToSection(item)"
-        >{{ item === 'company' ? 'About' : item }}</a>
-        <ThemeSwitcher />
-      </nav>
+            <div class="hidden md:flex items-center gap-2">
+                <GooeyNav
+                    :items="[
+                        { label: 'About', href: '#company' },
+                        { label: 'Products', href: '#products' },
+                        { label: 'Gallery', href: '#gallery' },
+                        { label: 'Contact', href: '#contact' },
+                    ]"
+                    :particle-count="10"
+                    :particle-distances="[80, 10]"
+                    :particle-r="80"
+                    :initial-active-index="0"
+                    :animation-time="500"
+                    :time-variance="250"
+                    :colors="[1, 2, 3, 4, 1, 2, 3, 4]"
+                    style="color: white"
+                />
+                <div class="flex items-center gap-1">
+                    <ThemeSwitcher />
+                </div>
+            </div>
+        </div>
+    </header>
 
-      <!-- Mobile Menu Button -->
-      <button
-        class="md:hidden p-2 rounded hover:bg-[var(--color-surface-container)] dark:hover:bg-[var(--color-dark-surface-container)]"
-        :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
-        :aria-expanded="mobileMenuOpen"
-        @click="mobileMenuOpen = !mobileMenuOpen"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          <path v-else stroke-linecap="round" stroke-width="2" d="M6 6l12 12M18 6l-12 12" />
-        </svg>
-      </button>
+    <!-- Mobile: StaggeredMenu full-screen overlay -->
+    <div
+        class="md:hidden fixed z-50"
+        :style="{
+            top: menuOpen ? '0' : '16px',
+            right: menuOpen ? '0' : '16px',
+            left: menuOpen ? '0' : 'auto',
+            bottom: menuOpen ? '0' : 'auto',
+            width: menuOpen ? '100%' : 'auto',
+            height: menuOpen ? '100dvh' : 'auto',
+        }"
+    >
+        <StaggeredMenu
+            position="right"
+            :items="menuItems"
+            :social-items="socialItems"
+            :display-socials="true"
+            :display-item-numbering="true"
+            menu-button-color="#1B3022"
+            open-menu-button-color="#1B3022"
+            :change-menu-color-on-open="true"
+            :colors="['#1B3022', '#2A4A3A']"
+            accent-color="#B4CDB8"
+            :is-fixed="true"
+            :logo-url="logoUrl"
+            :on-menu-open="() => (menuOpen = true)"
+            :on-menu-close="handleMenuClose"
+        />
     </div>
 
-    <!-- Mobile Nav Overlay -->
-    <Teleport to="body">
-      <Transition name="slide">
-        <div v-if="mobileMenuOpen" class="fixed inset-0 z-50 md:hidden">
-          <div class="absolute inset-0 bg-black/30" @click="mobileMenuOpen = false" />
-          <div class="absolute right-0 top-0 bottom-0 w-72 bg-white dark:bg-[var(--color-dark-surface)] shadow-xl p-6">
-            <button class="absolute top-4 right-4 p-2" @click="mobileMenuOpen = false" aria-label="Close menu">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-width="2" d="M6 6l12 12M18 6l-12 12" />
-              </svg>
-            </button>
-            <nav class="mt-12 flex flex-col gap-4" aria-label="Mobile navigation">
-              <a
-                v-for="item in sectionIds"
-                :key="item"
-                :href="`#${item}`"
-                class="text-lg font-medium text-[var(--color-on-surface)] no-underline hover:text-[var(--color-primary)] transition-colors"
-                @click.prevent="scrollToSection(item)"
-              >{{ item === 'company' ? 'About' : item }}</a>
-              <div class="mt-4">
-                <ThemeSwitcher show-label />
-              </div>
-            </nav>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-  </header>
+    <!-- Scroll Snap Dots -->
+    <nav class="snap-dots hidden md:flex" aria-label="Section navigation">
+        <button
+            v-for="(id, i) in sectionIds"
+            :key="id"
+            :class="['snap-dot', { active: currentSection === i }]"
+            :aria-label="`Go to ${id}`"
+            :title="
+                id === 'company'
+                    ? 'About'
+                    : id.charAt(0).toUpperCase() + id.slice(1)
+            "
+            @click="scrollToSection(i)"
+        ></button>
+    </nav>
 </template>
 
-<style scoped>
-.slide-enter-active, .slide-leave-active {
-  transition: opacity 0.2s ease;
-}
-.slide-enter-active > div:last-child,
-.slide-leave-active > div:last-child {
-  transition: transform 0.3s ease;
-}
-.slide-enter > div:last-child,
-.slide-leave-to > div:last-child {
-  transform: translateX(100%);
+<style>
+:root {
+    --color-1: #1b3022;
+    --color-2: #b4cdb8;
+    --color-3: #7e562e;
+    --color-4: #f1bc8c;
 }
 </style>

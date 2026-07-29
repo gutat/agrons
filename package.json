@@ -1,24 +1,31 @@
 {
-  "name": "agrons",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
-  },
-  "dependencies": {
-    "@pinia/nuxt": "^1.0.1",
-    "@supabase/supabase-js": "^2.111.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "@vueuse/core": "^14.4.0",
-    "@vueuse/motion": "^3.0.3",
-    "@vueuse/nuxt": "^14.4.0",
-    "nuxt": "^4.5.1",
-    "swiper": "^14.0.7",
-    "vue": "^3.5.40",
-    "vue-router": "^5.2.0"
-  }
+	"name": "agrons",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "nuxt build",
+		"dev": "nuxt dev",
+		"generate": "nuxt generate",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare"
+	},
+	"dependencies": {
+		"@pinia/nuxt": "^1.0.1",
+		"@supabase/supabase-js": "^2.111.0",
+		"@tailwindcss/vite": "^4.3.3",
+		"@vueuse/core": "^14.4.0",
+		"@vueuse/motion": "^3.0.3",
+		"@vueuse/nuxt": "^14.4.0",
+		"gsap": "^3.15.0",
+		"motion-v": "^1.10.2",
+		"nuxt": "^4.5.1",
+		"ogl": "^1.0.11",
+		"swiper": "^14.0.7",
+		"three": "^0.178.0",
+		"vue": "^3.5.40",
+		"vue-router": "^5.2.0"
+	},
+	"devDependencies": {
+		"jsrepo": "^3.8.1"
+	}
 }

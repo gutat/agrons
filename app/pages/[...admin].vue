@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AdminLayout from '~/admin/layouts/admin.vue'
+
 const config = useRuntimeConfig()
 const adminPath = config.public.adminPath || 'admin'
 

@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import vue from "@vitejs/plugin-vue";
 
 export default defineNuxtConfig({
   ssr: false,
@@ -14,6 +15,13 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    vue: {
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag: string) => tag.startsWith("swiper-"),
+        },
+      },
+    },
   },
 
   app: {

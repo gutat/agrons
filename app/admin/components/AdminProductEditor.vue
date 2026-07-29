@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { createClient } from '@supabase/supabase-js'
+import { useSupabase } from '~/utils/supabase'
 import type { Product } from '~/types'
 
-const config = useRuntimeConfig()
-const supabase = createClient(config.public.supabaseUrl, config.public.supabaseKey)
+const supabase = useSupabase()
 
 const props = defineProps<{ id: string }>()
 const isNew = props.id === 'new'
