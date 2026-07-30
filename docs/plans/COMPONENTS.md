@@ -681,7 +681,8 @@ export const useUiStore = defineStore('ui', () => {
 | Section | common/Section.vue | Common |
 | Button | common/Button.vue | Common |
 | Icon | common/Icon.vue | Common |
-| CompanySection | sections/CompanySection.vue | Section |
+| HomeSection | sections/HomeSection.vue | Section |
+| AboutSection | sections/AboutSection.vue | Section |
 | ProductsSection | sections/ProductsSection.vue | Section |
 | GallerySection | sections/GallerySection.vue | Section |
 | ContactSection | sections/ContactSection.vue | Section |

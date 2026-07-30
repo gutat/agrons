@@ -1,7 +1,7 @@
 # PT Agro Nusa Sejahtera - Project Plan
 
 ## Project Overview
-Single Page Application (SPA) for PT Agro Nusa Sejahtera - Premium Cocopeat and Cocofiber Products from Indonesia. Public landing page with 4 full-viewport sections + dynamic admin panel at configurable path. All content managed via Supabase (no static data files).
+Single Page Application (SPA) for PT Agro Nusa Sejahtera - Premium Cocopeat and Cocofiber Products from Indonesia. Public landing page with 5 full-viewport sections + dynamic admin panel at configurable path. All content managed via Supabase (no static data files).
 
 ## Tech Stack
 - **Nuxt 4** (Vue 3, Nitro, TypeScript)
@@ -79,10 +79,11 @@ agrons/
 ```
 
 ## Sections
-1. **Company Profile & About** - Hero + mission, vision, values
-2. **Products** - Cocopeat & Cocofiber tabs, Swiper, tap overlay
-3. **Gallery** - Images Swiper, tap fullscreen overlay
-4. **Contact** - Form, WhatsApp, map
+1. **Home** - Hero section with brand intro, RotatingText tagline, CTA buttons
+2. **About** - Mission, vision, values, company background
+3. **Products** - Cocopeat & Cocofiber tabs, CircularGallery, tap overlay
+4. **Gallery** - Masonry grid, tap fullscreen overlay
+5. **Contact** - Reach out card, WhatsApp integration, map
 
 ## Database (Supabase)
 All content stored in Supabase PostgreSQL tables:
@@ -92,12 +93,13 @@ All content stored in Supabase PostgreSQL tables:
 - **contact_submissions** - form submissions from visitors
 - **admin_users** - authenticated admin accounts
 
+
 ## Key Features
-- **Full-viewport CSS Scroll Snap** — 4 sections, auto-snap
-- **Animated section entry** — via `@vueuse/motion`
+- **Full-viewport CSS Scroll Snap** — 5 sections, auto-snap
+- **Animated section entry** — via BlurText, vue-bits animations
 - **Supabase content** — All data fetched at runtime, editable via admin
 - **Dynamic admin** — CRUD pages for products, gallery, company profile
-- **SwiperJS** — Products & Gallery carousels
+- **vue-bits animations** — Aurora, LightPillar, CircularGallery, Masonry, BlurText, RotatingText, TrueFocus, ShinyText
 - **Dark/Light theme** — System preference + manual toggle
 - **Cloudflare R2** — Image storage
 - **WhatsApp integration** — Floating button, prefilled inquiries

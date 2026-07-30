@@ -1,6 +1,6 @@
 export function useViewport() {
   const currentSection = ref(0)
-  const sectionIds = ['company', 'products', 'gallery', 'contact']
+  const sectionIds = ['home', 'about', 'products', 'gallery', 'contact']
 
   function scrollToSection(index: number) {
     const el = document.getElementById(sectionIds[index])

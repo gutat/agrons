@@ -16,8 +16,11 @@
 │  │                    Components Layer                       │  │
 │  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌───────────────┐  │  │
 │  │  │ Layout  │ │ Sections│ │ Products│ │   Gallery     │  │  │
-│  │  │ Header/ │ │ Company │ │ Swiper/ │ │   Swiper/     │  │  │
-│  │  │ Footer  │ │ About/  │ │ Overlay │ │   Overlay     │  │  │
+│  │  │ Header/ │ │ Home/   │ │ Circular│ │   Masonry/    │  │  │
+│  │  │ Footer  │ │ About/  │ │ Gallery │ │   Overlay     │  │  │
+│  │  │         │ │ Products│ │ Overlay │ │               │  │  │
+│  │  │         │ │ Gallery/│ │         │ │               │  │  │
+│  │  │         │ │ Contact │ │         │ │               │  │  │
 │  │  └─────────┘ └─────────┘ └─────────┘ └───────────────┘  │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │         │                              │                        │

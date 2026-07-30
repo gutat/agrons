@@ -28,7 +28,8 @@ Single route (`/`) with 5 full-viewport sections. Pure SPA navigation via anchor
 ### Anchor Links (in AppHeader, MobileMenu)
 ```html
 <nav>
-  <a href="#company">Company</a>
+  <a href="#home">Home</a>
+  <a href="#about">About</a>
   <a href="#products">Products</a>
   <a href="#gallery">Gallery</a>
   <a href="#contact">Contact</a>
@@ -37,7 +38,8 @@ Single route (`/`) with 5 full-viewport sections. Pure SPA navigation via anchor
 
 ### Section IDs (in Section.vue)
 ```vue
-<Section id="company" full-viewport>...</Section>
+<Section id="home" full-viewport>...</Section>
+<Section id="about" full-viewport>...</Section>
 <Section id="products" full-viewport>...</Section>
 <Section id="gallery" full-viewport>...</Section>
 <Section id="contact" full-viewport>...</Section>
@@ -129,7 +131,7 @@ const props = defineProps<Props>()
 |-----|--------|
 | `ArrowDown` / `PageDown` | Next section |
 | `ArrowUp` / `PageUp` | Previous section |
-| `Home` | First section (Company)
+| `Home` | First section (Home) |
 | `End` | Last section (Contact) |
 | `Tab` | Focus next interactive element |
 | `Enter` / `Space` | Activate focused link/button |
@@ -140,7 +142,7 @@ import { useIntersectionObserver, useSwipe } from '@vueuse/core'
 
 export function useViewport() {
   const currentSection = ref(0)
-  const sectionIds = ['company', 'products', 'gallery', 'contact']
+  const sectionIds = ['home', 'about', 'products', 'gallery', 'contact']
 
   // IntersectionObserver for scroll spy (updates header active link)
   onMounted(() => {

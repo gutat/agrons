@@ -26,9 +26,11 @@ setupEntryAnimations();
 const menuItems = computed(() =>
     sectionIds.map((id) => ({
         label:
-            id === "company"
-                ? "About"
-                : id.charAt(0).toUpperCase() + id.slice(1),
+            id === "home"
+                ? "Home"
+                : id === "about"
+                  ? "About"
+                  : id.charAt(0).toUpperCase() + id.slice(1),
         ariaLabel: `Go to ${id} section`,
         link: `#${id}`,
     })),
@@ -69,9 +71,9 @@ const logoUrl = "/logo.png";
             class="h-14 md:h-16 flex items-center justify-between px-4 md:px-6"
         >
             <a
-                href="#company"
+                href="#home"
                 class="flex items-center gap-2.5 no-underline select-none"
-                @click.prevent="onNavClick('company')"
+                @click.prevent="onNavClick('home')"
             >
                 <img src="/logo.png" alt="Agro Nusa" class="h-8 w-auto" />
             </a>
@@ -79,7 +81,8 @@ const logoUrl = "/logo.png";
             <div class="hidden md:flex items-center gap-2">
                 <GooeyNav
                     :items="[
-                        { label: 'About', href: '#company' },
+                        { label: 'Home', href: '#home' },
+                        { label: 'About', href: '#about' },
                         { label: 'Products', href: '#products' },
                         { label: 'Gallery', href: '#gallery' },
                         { label: 'Contact', href: '#contact' },
@@ -90,7 +93,7 @@ const logoUrl = "/logo.png";
                     :initial-active-index="0"
                     :animation-time="500"
                     :time-variance="250"
-                    :colors="[1, 2, 3, 4, 1, 2, 3, 4]"
+                    :colors="[1, 2, 3, 4, 5, 1, 2, 3, 4, 5]"
                     style="color: white"
                 />
                 <div class="flex items-center gap-1">
@@ -137,11 +140,7 @@ const logoUrl = "/logo.png";
             :key="id"
             :class="['snap-dot', { active: currentSection === i }]"
             :aria-label="`Go to ${id}`"
-            :title="
-                id === 'company'
-                    ? 'About'
-                    : id.charAt(0).toUpperCase() + id.slice(1)
-            "
+            :title="id === 'home' ? 'Home' : id === 'about' ? 'About' : id.charAt(0).toUpperCase() + id.slice(1)"
             @click="scrollToSection(i)"
         ></button>
     </nav>

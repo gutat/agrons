@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import AppHeader from '~/components/layout/AppHeader.vue'
 import AppFooter from '~/components/layout/AppFooter.vue'
-import CompanySection from '~/components/sections/CompanySection.vue'
+import HomeSection from '~/components/sections/HomeSection.vue'
+import AboutSection from '~/components/sections/AboutSection.vue'
 import ProductsSection from '~/components/sections/ProductsSection.vue'
 import GallerySection from '~/components/sections/GallerySection.vue'
 import ContactSection from '~/components/sections/ContactSection.vue'
@@ -22,7 +23,8 @@ useHead({
   <div class="page-enter">
     <AppHeader />
     <main>
-      <CompanySection />
+      <HomeSection />
+      <AboutSection />
       <ProductsSection />
       <GallerySection />
       <ContactSection />
