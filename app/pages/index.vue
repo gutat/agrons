@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppHeader from '~/components/layout/AppHeader.vue'
-import AppFooter from '~/components/layout/AppFooter.vue'
 import HomeSection from '~/components/sections/HomeSection.vue'
 import AboutSection from '~/components/sections/AboutSection.vue'
 import ProductsSection from '~/components/sections/ProductsSection.vue'
@@ -29,6 +28,5 @@ useHead({
       <GallerySection />
       <ContactSection />
     </main>
-    <AppFooter />
   </div>
 </template>

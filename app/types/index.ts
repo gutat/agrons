@@ -13,6 +13,13 @@ export interface PackagingInfo {
   containerLoad?: string
 }
 
+export interface ProductMedia {
+  type: 'image' | 'video'
+  url: string
+  thumbnail?: string
+  alt?: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -22,6 +29,8 @@ export interface Product {
   description: string
   images: string[]
   thumbnail: string
+  video_url?: string
+  media?: ProductMedia[]
   specifications: Specification[]
   applications: string[]
   certifications: string[]
@@ -41,26 +50,44 @@ export interface GalleryItem {
   image: string
   thumbnail: string
   alt: string
+  type?: 'image' | 'video'
   sort_order: number
   published: boolean
 }
 
-export interface CompanyInfo {
-  name: string
+export interface HomeSection {
+  id: number
+  company_name: string
   tagline: string
+  description?: string
+  subtitle: string
+  hero_video_url?: string
+  hero_image_url?: string
+  published: boolean
+}
+
+export interface AboutSection {
+  id: number
+  title: string
   mission: string
   vision: string
   values: { icon: string; title: string; description: string }[]
-  description: string
-  logo_url: string
-  contact: {
+  hero_video_url?: string
+  hero_image_url?: string
+  published: boolean
+}
+
+export interface CompanyInfo {
+  name?: string
+  logo_url?: string
+  contact?: {
     address: string
     phone: string
     email: string
     whatsapp: string
-    mapEmbed: string
+    mapEmbed?: string
   }
-  social: Record<string, string>
+  social?: Record<string, string>
 }
 
 export interface ContactFormData {

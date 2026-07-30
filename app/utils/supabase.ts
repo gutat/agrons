@@ -1,14 +1,24 @@
 import { createClient } from '@supabase/supabase-js'
 
-let supabaseClient: ReturnType<typeof createClient> | null = null
+// Use globalThis to survive HMR in dev mode
+const key = '__supabase_client__'
+const g = globalThis as any
 
 export function useSupabase() {
-  if (supabaseClient) return supabaseClient
+  if (g[key]) return g[key]
 
   const config = useRuntimeConfig()
-  supabaseClient = createClient(
+  g[key] = createClient(
     config.public.supabaseUrl,
-    config.public.supabaseKey
+    config.public.supabaseKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+        storageKey: 'agrons-supabase-key',
+      },
+    }
   )
-  return supabaseClient
+  return g[key]
 }

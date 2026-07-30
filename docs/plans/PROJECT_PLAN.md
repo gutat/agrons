@@ -58,12 +58,11 @@ agrons/
 │   │   ├── layout/
 │   │   │   ├── AppHeader.vue, AppFooter.vue, MobileMenu.vue, ThemeSwitcher.vue
 │   │   ├── sections/
-│   │   │   ├── CompanySection.vue, ProductsSection.vue
-│   │   │   ├── GallerySection.vue, ContactSection.vue
+│   │   │   ├── HomeSection.vue, AboutSection.vue
+│   │   │   ├── ProductsSection.vue, GallerySection.vue, ContactSection.vue
 │   │   ├── products/
-│   │   │   ├── ProductCard.vue, ProductSwiper.vue, ProductDetailOverlay.vue
+│   │   │   ├── ProductGalleryOverlay.vue
 │   │   └── gallery/
-│   │       ├── GallerySwiper.vue, GalleryDetailOverlay.vue
 │   ├── composables/
 │   │   ├── useProducts.ts, useGallery.ts, useOverlay.ts, useViewport.ts
 │   ├── stores/
@@ -79,27 +78,29 @@ agrons/
 ```
 
 ## Sections
-1. **Home** - Hero section with brand intro, RotatingText tagline, CTA buttons
-2. **About** - Mission, vision, values, company background
-3. **Products** - Cocopeat & Cocofiber tabs, CircularGallery, tap overlay
-4. **Gallery** - Masonry grid, tap fullscreen overlay
-5. **Contact** - Reach out card, WhatsApp integration, map
+1. **Home** - Hero section with brand intro, RotatingText tagline, CTA buttons. Background: video or image from company_info.hero_video_url / hero_image_url.
+2. **About** - Mission, vision, values, company background. Optional background image from company_info.hero_image_url.
+3. **Products** - Cocopeat & Cocofiber tabs, product swiper with specs left / video or image right, text-only category switcher, GSAP-animated gallery overlay.
+4. **Gallery** - Masonry grid (images + videos), tap fullscreen overlay.
+5. **Contact** - Reach out card, WhatsApp integration, map.
 
 ## Database (Supabase)
 All content stored in Supabase PostgreSQL tables:
-- **products** - id, name, category, description, specs, images, slug
-- **gallery_items** - id, category, title, description, image
-- **company_info** - single row: name, tagline, mission, vision, values, contact
+- **products** - id, name, category, description, specs, images, slug, video_url, media (JSON gallery)
+- **gallery_items** - id, category, title, description, image, type (image|video), thumbnail
+- **company_info** - single row: name, tagline, mission, vision, values, contact, hero_video_url, hero_image_url
 - **contact_submissions** - form submissions from visitors
 - **admin_users** - authenticated admin accounts
-
 
 ## Key Features
 - **Full-viewport CSS Scroll Snap** — 5 sections, auto-snap
 - **Animated section entry** — via BlurText, vue-bits animations
+- **GSAP-powered product gallery** — StaggeredMenu-style slide-in overlay
+- **Video/image backgrounds** — Home and About sections support configurable media
+- **Product video support** — Products can have cover video + media gallery (images/videos)
 - **Supabase content** — All data fetched at runtime, editable via admin
 - **Dynamic admin** — CRUD pages for products, gallery, company profile
 - **vue-bits animations** — Aurora, LightPillar, CircularGallery, Masonry, BlurText, RotatingText, TrueFocus, ShinyText
 - **Dark/Light theme** — System preference + manual toggle
-- **Cloudflare R2** — Image storage
+- **Cloudflare R2** — Image and video storage
 - **WhatsApp integration** — Floating button, prefilled inquiries

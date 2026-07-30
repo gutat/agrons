@@ -1,36 +1,73 @@
 <script setup lang="ts">
+import { useSupabase } from "~/utils/supabase";
 import Section from "~/components/common/Section.vue";
 import Button from "~/components/common/Button.vue";
 import RotatingText from "~/components/bits/RotatingText.vue";
 import BlurText from "~/components/bits/BlurText.vue";
+import SplitText from "~/components/bits/SplitText.vue";
 import StarBorder from "~/components/bits/StarBorder.vue";
+import ShinyText from "~/components/bits/ShinyText.vue";
+
+const supabase = useSupabase();
+
+const section = ref({
+    company_name: "PT Agro Nusa Sejahtera",
+    tagline: "Premium Cocopeat & Cocofiber from Indonesia",
+    description: "",
+    subtitle: "Sustainable, high-quality coconut-based growing media for global agriculture.",
+    hero_video_url: undefined as string | undefined,
+    hero_image_url: undefined as string | undefined,
+});
+
+const posterUrl = computed(() => {
+    if (section.value.hero_image_url) return section.value.hero_image_url;
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Crect fill='%231B3022' width='640' height='640'/%3E%3C/svg%3E";
+});
+
+onMounted(async () => {
+    const { data } = await supabase
+        .from("home_section")
+        .select("company_name, tagline, description, subtitle, hero_video_url, hero_image_url")
+        .eq("published", true)
+        .single();
+    if (data) section.value = { ...section.value, ...data };
+});
 </script>
 
 <template>
     <Section id="home" dark>
-        <!-- Video Background -->
+        <!-- Video/Image Background -->
         <div
             aria-hidden="true"
             class="absolute inset-0 overflow-hidden"
             style="z-index: 0"
         >
             <video
+                v-if="section.hero_video_url"
                 autoplay
                 muted
                 loop
                 playsinline
-                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Crect fill='%231B3022' width='640' height='640'/%3E%3C/svg%3E"
+                :poster="posterUrl"
                 class="absolute inset-0 w-full h-full object-cover"
                 style="filter: saturate(0.7) brightness(0.5)"
             >
-                <source
-                    src="https://media.istockphoto.com/id/1393846455/id/video/tumpukan-massal-fireweed-fermentasi.mp4?s=mp4-640x640-is&k=20&c=wZw1TnAOy5adYfckZWpFdh9DCCSyvAM0Jz2dHkNZQQ8="
-                    type="video/mp4"
-                />
+                <source :src="section.hero_video_url" type="video/mp4" />
             </video>
-            <!-- Dark overlay -->
+            <img
+                v-else-if="section.hero_image_url"
+                :src="section.hero_image_url"
+                alt=""
+                class="absolute inset-0 w-full h-full object-cover"
+                style="filter: saturate(0.7) brightness(0.5)"
+            />
             <div
-                class="absolute inset-0 bg-gradient-to-b from-[var(--color-forest)]/80 via-[var(--color-forest)]/70 to-[var(--color-forest)]/85"
+                v-else
+                class="absolute inset-0 bg-[var(--color-forest)]"
+            ></div>
+            <!-- Neutral dark overlay — lets video/image colors show through -->
+            <div
+                class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"
             ></div>
             <div
                 class="absolute inset-0"
@@ -43,7 +80,7 @@ import StarBorder from "~/components/bits/StarBorder.vue";
                         ),
                         radial-gradient(
                             ellipse at 80% 20%,
-                            rgba(241, 188, 140, 0.08),
+                            rgba(241, 188, 140, 0.15),
                             transparent 60%
                         ),
                         radial-gradient(
@@ -59,29 +96,63 @@ import StarBorder from "~/components/bits/StarBorder.vue";
             <div
                 class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full section-content"
             >
-                <!-- Numbered Header -->
-                <div class="section-header animate-entry">
-                    <span class="section-number">01 &mdash; Home</span>
-                    <span class="section-divider" />
+                <div class="mb-3">
+                    <SplitText
+                        text="01 &mdash; Home"
+                        className="section-number block text-[11px]"
+                        :delay="80"
+                        :duration="0.5"
+                        ease="power3.out"
+                        split-type="chars"
+                        :from="{ opacity: 0, y: 30 }"
+                        :to="{ opacity: 1, y: 0 }"
+                        :threshold="0.1"
+                        root-margin="-100px"
+                        text-align="left"
+                    />
+                    <span class="section-divider mt-2 block" />
                 </div>
 
-                <!-- Hero -->
                 <div
                     class="max-w-3xl mx-auto animate-entry delay-1 text-center md:text-left"
                 >
+                    <ShinyText
+                        :text="section.tagline"
+                        :speed="2"
+                        color="rgba(255,255,255,0.7)"
+                        shine-color="var(--color-husk-light)"
+                        :spread="80"
+                        direction="left"
+                        class="label-caps !block tracking-[0.12em]"
+                    />
+
                     <BlurText
-                        text="PT Agro Nusa Sejahtera"
-                        className="label-caps tracking-[0.2em] !block !text-white/70"
-                        :delay="80"
-                        :step-duration="0.25"
-                        animate-by="letters"
+                        v-if="section.description"
+                        :text="section.description"
+                        className="!text-white/90 body-lg leading-relaxed max-w-xl mt-4"
+                        :delay="100"
+                        :step-duration="0.3"
+                        animate-by="words"
                         direction="bottom"
                     />
 
                     <h1
-                        class="display-lg mt-3 md:mt-4 mb-2 md:mb-3 leading-[1.08]"
+                        class="display-lg mt-6 md:mt-10 mb-3 md:mb-4 leading-[1.08]"
                     >
-                        <span class="text-white">Premium</span>
+                        <SplitText
+                            text="Premium"
+                            tag="span"
+                            className="inline text-white tracking-wide opacity-80"
+                            split-type="chars"
+                            :delay="60"
+                            :duration="0.4"
+                            ease="power3.out"
+                            :from="{ opacity: 0, y: 20 }"
+                            :to="{ opacity: 1, y: 0 }"
+                            :threshold="0.3"
+                            root-margin="-50px"
+                            text-align="left"
+                        />
                         <span
                             class="inline-block min-w-[200px] md:min-w-[280px] text-left relative"
                         >
@@ -89,7 +160,6 @@ import StarBorder from "~/components/bits/StarBorder.vue";
                                 :texts="[
                                     'Cocopeat',
                                     'Cocofiber',
-                                    'Growing Media',
                                     'Sustainable Fiber',
                                 ]"
                                 :rotation-interval="2800"
@@ -108,34 +178,46 @@ import StarBorder from "~/components/bits/StarBorder.vue";
                                 element-level-class-name="text-[var(--color-husk-light)]"
                             />
                         </span>
-                        <br /><span class="text-white">from Indonesia</span>
+                                                <br /><SplitText
+                                                    text="from Indonesia"
+                                                    tag="span"
+                                                    className="inline text-white tracking-wide"
+                                                    split-type="chars"
+                                                    :delay="60"
+                                                    :duration="0.4"
+                                                    ease="power3.out"
+                                                    :from="{ opacity: 0, y: 20 }"
+                                                    :to="{ opacity: 1, y: 0 }"
+                                                    :threshold="0.3"
+                                                    root-margin="-50px"
+                                                    text-align="left"
+                                                />
                     </h1>
 
                     <BlurText
-                        text="Sustainable, high-quality coconut-based growing media for global agriculture."
-                        className="!text-white/80 body-lg leading-relaxed max-w-xl !mt-2 text-left"
-                        :delay="100"
+                        :text="section.subtitle"
+                        className="!text-white/75 body-lg leading-relaxed max-w-xl !mt-6 text-left"
+                        :delay="120"
                         :step-duration="0.3"
                         animate-by="words"
                         direction="bottom"
                     />
 
-                    <!-- CTAs -->
                     <div
-                        class="flex flex-wrap items-center gap-4 mt-6 md:mt-10"
+                        class="flex flex-wrap items-center gap-5 mt-10 md:mt-16"
                     >
                         <StarBorder
                             as="a"
-                            href="#about"
+                            href="#products"
                             color="white"
                             speed="2s"
                             :thickness="6"
                             custom-class="explore-btn"
                         >
                             <span
-                                class="flex items-center gap-2 text-sm font-semibold"
+                                class="flex items-center gap-2 text-sm font-bold"
                             >
-                                Learn More
+                                Our Products
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="16"

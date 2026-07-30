@@ -26,16 +26,7 @@
       <header
         class="top-0 left-0 z-20 absolute flex justify-between items-center bg-transparent p-[2em] w-full pointer-events-none staggered-menu-header"
         aria-label="Main navigation header"
-      >
-        <div class="flex items-center pointer-events-auto select-none sm-logo" aria-label="Logo">
-          <img
-            :src="logoUrl || '/src/assets/logos/vuebits-gh-white.svg'"
-            alt="Logo"
-            class="block w-auto h-8 object-contain sm-logo-img"
-            :draggable="false"
-            width="110"
-            height="24"
-          />
+      ><div class="flex items-center pointer-events-auto select-none sm-logo" aria-label="Logo">
         </div>
 
         <button
@@ -184,7 +175,7 @@ const props = withDefaults(defineProps<StaggeredMenuProps>(), {
   socialItems: () => [],
   displaySocials: true,
   displayItemNumbering: true,
-  logoUrl: '/src/assets/logos/vuebits-gh-white.svg',
+  logoUrl: undefined,
   menuButtonColor: '#fff',
   openMenuButtonColor: '#fff',
   changeMenuColorOnOpen: true,

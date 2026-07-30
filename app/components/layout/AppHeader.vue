@@ -6,6 +6,7 @@ import StaggeredMenu from "~/components/bits/StaggeredMenu.vue";
 import GooeyNav from "~/components/bits/GooeyNav.vue";
 
 const { y: scrollY } = useWindowScroll();
+const supabase = useSupabase();
 const {
     currentSection,
     sectionIds,
@@ -14,7 +15,7 @@ const {
     setupEntryAnimations,
 } = useViewport();
 
-const scrolled = computed(() => false);
+const scrolled = computed(() => scrollY.value > 50);
 
 function onNavClick(id: string) {
     scrollToSection(sectionIds.indexOf(id));
@@ -36,10 +37,43 @@ const menuItems = computed(() =>
     })),
 );
 
-const socialItems = [
+const socialItems = ref<{ label: string; link: string }[]>([
     { label: "WA", link: "https://wa.me/6281234567890" },
     { label: "Email", link: "mailto:export@agronusa.co.id" },
-];
+]);
+
+onMounted(async () => {
+    const { data } = await supabase
+        .from("company_info")
+        .select("contact, social")
+        .single();
+    if (data) {
+        const items: { label: string; link: string }[] = [];
+        if (data.contact?.whatsapp) {
+            const num = String(data.contact.whatsapp).replace(/[^0-9]/g, "");
+            items.push({ label: "WA", link: `https://wa.me/${num}` });
+        }
+        if (data.contact?.email) {
+            items.push({ label: "Email", link: `mailto:${data.contact.email}` });
+        }
+        if (data.social) {
+            const platformLabels: Record<string, string> = {
+                instagram: "Instagram",
+                linkedin: "LinkedIn",
+                youtube: "YouTube",
+                tiktok: "TikTok",
+                facebook: "Facebook",
+                twitter: "Twitter",
+            };
+            for (const [platform, url] of Object.entries(data.social)) {
+                if (url) {
+                    items.push({ label: platformLabels[platform] || platform, link: String(url) });
+                }
+            }
+        }
+        if (items.length > 0) socialItems.value = items;
+    }
+});
 
 const menuOpen = ref(false);
 
@@ -49,36 +83,62 @@ function handleMenuClose() {
     }, 500);
 }
 
-// Inline logo SVG for StaggeredMenu
 const logoUrl = "/logo.png";
+
+// Dark sections: Home=0, About=1
+const isDarkSection = computed(() => [0, 1].includes(currentSection.value));
+
+const activeDotStyle = computed(() => {
+    if (isDarkSection.value) {
+        return {
+            background: "white",
+            boxShadow: "0 0 10px 3px rgba(255, 255, 255, 0.3)",
+        };
+    }
+    return {
+        background: "var(--color-forest)",
+        boxShadow: "0 0 8px 2px color-mix(in oklch, var(--color-forest) 40%, transparent)",
+    };
+});
+
+const inactiveDotStyle = computed(() => ({
+    background: isDarkSection.value
+        ? "color-mix(in oklch, white 50%, transparent)"
+        : "color-mix(in oklch, var(--color-ink) 25%, transparent)",
+}));
 </script>
 
 <template>
-    <!-- Desktop Pill Nav -->
+    <!-- Desktop Glass Header -->
     <header
-        :class="['nav-glass mx-auto max-w-(--spacing-container)', { scrolled }]"
+        :class="[
+            'fixed top-0 left-0 right-0 z-50 transition-shadow duration-300',
+            { 'shadow-lg': scrolled },
+        ]"
         style="
-            border-radius: 9999px;
             background: color-mix(
                 in oklch,
-                var(--color-parchment) 25%,
+                var(--color-parchment) 55%,
                 transparent
             );
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid color-mix(in oklch, var(--color-ink) 6%, transparent);
         "
     >
         <div
-            class="h-14 md:h-16 flex items-center justify-between px-4 md:px-6"
+            class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) h-14 md:h-16 flex items-center justify-between"
         >
             <a
                 href="#home"
-                class="flex items-center gap-2.5 no-underline select-none"
+                class="flex items-center gap-3 no-underline select-none"
                 @click.prevent="onNavClick('home')"
             >
                 <img src="/logo.png" alt="Agro Nusa" class="h-8 w-auto" />
+                <span class="hidden sm:inline text-sm md:text-base font-semibold text-[var(--color-forest)] dark:text-[var(--color-forest-light)] leading-none">Agro Nusa Sejahtera</span>
             </a>
 
-            <div class="hidden md:flex items-center gap-2">
+            <div class="hidden md:flex items-center gap-2 self-stretch">
                 <GooeyNav
                     :items="[
                         { label: 'Home', href: '#home' },
@@ -100,38 +160,28 @@ const logoUrl = "/logo.png";
                     <ThemeSwitcher />
                 </div>
             </div>
+
+            <!-- Mobile: StaggeredMenu -->
+            <div class="md:hidden flex items-center">
+                <StaggeredMenu
+                    position="right"
+                    :items="menuItems"
+                    :social-items="socialItems"
+                    :display-socials="true"
+                    :display-item-numbering="true"
+                    menu-button-color="#1B3022"
+                    open-menu-button-color="#1B3022"
+                    :change-menu-color-on-open="true"
+                    :colors="['#1B3022', '#2A4A3A']"
+                    accent-color="#B4CDB8"
+                    :is-fixed="true"
+                    v-bind="menuOpen ? { 'logo-url': logoUrl } : {}"
+                    :on-menu-open="() => (menuOpen = true)"
+                    :on-menu-close="handleMenuClose"
+                />
+            </div>
         </div>
     </header>
-
-    <!-- Mobile: StaggeredMenu full-screen overlay -->
-    <div
-        class="md:hidden fixed z-50"
-        :style="{
-            top: menuOpen ? '0' : '16px',
-            right: menuOpen ? '0' : '16px',
-            left: menuOpen ? '0' : 'auto',
-            bottom: menuOpen ? '0' : 'auto',
-            width: menuOpen ? '100%' : 'auto',
-            height: menuOpen ? '100dvh' : 'auto',
-        }"
-    >
-        <StaggeredMenu
-            position="right"
-            :items="menuItems"
-            :social-items="socialItems"
-            :display-socials="true"
-            :display-item-numbering="true"
-            menu-button-color="#1B3022"
-            open-menu-button-color="#1B3022"
-            :change-menu-color-on-open="true"
-            :colors="['#1B3022', '#2A4A3A']"
-            accent-color="#B4CDB8"
-            :is-fixed="true"
-            :logo-url="logoUrl"
-            :on-menu-open="() => (menuOpen = true)"
-            :on-menu-close="handleMenuClose"
-        />
-    </div>
 
     <!-- Scroll Snap Dots -->
     <nav class="snap-dots hidden md:flex" aria-label="Section navigation">
@@ -139,6 +189,7 @@ const logoUrl = "/logo.png";
             v-for="(id, i) in sectionIds"
             :key="id"
             :class="['snap-dot', { active: currentSection === i }]"
+            :style="currentSection === i ? activeDotStyle : inactiveDotStyle"
             :aria-label="`Go to ${id}`"
             :title="id === 'home' ? 'Home' : id === 'about' ? 'About' : id.charAt(0).toUpperCase() + id.slice(1)"
             @click="scrollToSection(i)"
@@ -152,5 +203,11 @@ const logoUrl = "/logo.png";
     --color-2: #b4cdb8;
     --color-3: #7e562e;
     --color-4: #f1bc8c;
+}
+
+/* Center StaggeredMenu toggle button in header height */
+.md\:hidden .sm-scope .sm-toggle {
+    top: -12px !important;
+    right: -14px !important;
 }
 </style>

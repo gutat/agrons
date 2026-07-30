@@ -1,42 +1,77 @@
 <script setup lang="ts">
+import { useSupabase } from "~/utils/supabase";
 import Section from "~/components/common/Section.vue";
 import Button from "~/components/common/Button.vue";
-import LightPillar from "~/components/bits/LightPillar.vue";
 import BlurText from "~/components/bits/BlurText.vue";
+import SplitText from "~/components/bits/SplitText.vue";
+
+const supabase = useSupabase();
+
+const defaults = {
+    address: "Medan Industrial Estate, Indonesia",
+    email: "export@agronusa.co.id",
+    whatsapp: "+6281234567890",
+    whatsappLink: "https://wa.me/6281234567890",
+};
+
+const contact = ref({ ...defaults });
+const social = ref<Record<string, string>>({});
+const loaded = ref(false);
+
+const socialPaths: Record<string, string> = {
+    linkedin: "M80 16C44.64 16 16 44.64 16 80c0 35.36 28.64 64 64 64 35.36 0 64-28.64 64-64 0-35.36-28.64-64-64-64zM64 112H48V64h16v48zm-8-56a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm72 56h-16v-24c0-8-6-14-14-14s-14 6-14 14v24H68V64h16v8c4-4 10-8 18-8 14 0 26 12 26 28v20z",
+    instagram: "M128 24a104 104 0 1 0 0 208 104 104 0 0 0 0-208zm40 120c0 12-10 22-22 22H86c-12 0-22-10-22-22V86c0-12 10-22 22-22h60c12 0 22 10 22 22v58zm-40-48c-10 0-18 8-18 18s8 18 18 18 18-8 18-18-8-18-18-18zm20-18a8 8 0 1 1 0 16 8 8 0 0 1 0-16z",
+    facebook: "M128 24a104 104 0 1 0 0 208 104 104 0 0 0 0-208zm16 80h-12v-8c0-4 2-6 6-6h6V72h-10c-12 0-18 8-18 18v14h-10v18h10v40h18v-40h12l2-18z",
+    youtube: "M128 24a104 104 0 1 0 0 208 104 104 0 0 0 0-208zm56 128c0 8-6 14-14 14H86c-8 0-14-6-14-14V88c0-8 6-14 14-14h84c8 0 14 6 14 14v64zm-32-40l-28-16v32l28-16z",
+    twitter: "M128 24a104 104 0 1 0 0 208 104 104 0 0 0 0-208zm48 84v4c0 28-22 50-50 50-14 0-26-4-36-10 2 0 4 0 6 0 12 0 22-4 30-10-10 0-18-8-20-18 2 0 4 0 6 0 2 0 4 0 6 0-10-2-18-12-18-24v-2c4 2 8 4 12 4-6-4-10-10-10-18 0-4 2-8 4-12 12 14 28 24 48 26-2-4-2-8-2-12 0-12 10-22 22-22 6 0 12 2 16 6 4-2 10-4 14-6-2 6-6 10-12 14 4 0 8-2 12-4-2 4-6 10-10 14z",
+};
+
+onMounted(async () => {
+    const { data } = await supabase
+        .from("company_info")
+        .select("contact, social")
+        .single();
+    if (data) {
+        if (data.contact) {
+            const raw = data.contact as any;
+            contact.value = {
+                address: raw.address || defaults.address,
+                email: raw.email || defaults.email,
+                whatsapp: raw.whatsapp || defaults.whatsapp,
+                whatsappLink: `https://wa.me/${(raw.whatsapp || defaults.whatsapp).replace(/[^0-9]/g, "")}`,
+            };
+        }
+        if (data.social) social.value = data.social as Record<string, string>;
+    }
+    loaded.value = true;
+});
 </script>
 
 <template>
-    <Section id="contact" dark class="relative overflow-hidden">
-        <!-- Dark background for LightPillar visibility -->
-        <div class="absolute inset-0 z-0 !bg-[var(--color-charcoal)]">
-            <LightPillar
-                top-color="#1B3022"
-                bottom-color="#4A7A5A"
-                :intensity="1.0"
-                :rotation-speed="0.3"
-                :glow-amount="0.005"
-                :pillar-width="3.0"
-                :pillar-height="0.4"
-                :noise-intensity="0.5"
-                :pillar-rotation="0"
-                :interactive="false"
-            />
-        </div>
-
+    <Section id="contact">
         <div
-            class="relative z-10 max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full h-full flex flex-col items-center justify-center"
+            class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full h-full flex flex-col items-center justify-center"
         >
             <!-- Numbered Header -->
-            <div class="section-header animate-entry flex-shrink-0">
-                <span class="section-number"
-                    >04 &mdash; Contact</span
-                >
-                <span class="section-divider" />
+            <div class="mb-3 flex-shrink-0">
+                <SplitText
+                    text="05 &mdash; Contact"
+                    className="section-number block"
+                    :delay="80"
+                    :duration="0.5"
+                    ease="power3.out"
+                    split-type="chars"
+                    :from="{ opacity: 0, y: 30 }"
+                    :to="{ opacity: 1, y: 0 }"
+                    :threshold="0.1"
+                    root-margin="-100px"
+                    text-align="left"
+                />
+                <span class="section-divider mt-2 block" />
             </div>
 
             <!-- Section Title -->
-            <div class="animate-entry delay-1 flex-shrink-0 text-center">
-                text-left">
+            <div class="animate-entry delay-1 flex-shrink-0 w-full max-w-lg">
                 <BlurText
                     text="Get in Touch"
                     className="headline-md mb-3"
@@ -59,10 +94,9 @@ import BlurText from "~/components/bits/BlurText.vue";
             <div
                 class="animate-entry delay-2 mt-6 md:mt-10 w-full max-w-lg mx-auto"
             >
-                <div
-                    class="card !p-6 md:!p-8 !bg-white/10 !backdrop-blur-md !border-white/10"
-                >
+                <div class="card !p-6 md:!p-8">
                     <div class="space-y-4 md:space-y-5">
+                        <!-- Address -->
                         <div class="flex items-center gap-3 md:gap-4">
                             <div
                                 class="w-9 h-9 rounded-lg bg-[var(--color-husk-muted)] dark:bg-white/10 flex items-center justify-center flex-shrink-0"
@@ -81,15 +115,19 @@ import BlurText from "~/components/bits/BlurText.vue";
                             </div>
                             <div>
                                 <p
-                                    class="text-xs font-bold uppercase tracking-widest text-[var(--color-husk-light)]"
+                                    class="label-caps dark:!text-[var(--color-husk-light)]"
                                 >
                                     Address
                                 </p>
-                                <p class="text-sm text-white/80 mt-0.5">
-                                    Medan Industrial Estate, Indonesia
+                                <p
+                                    class="text-sm text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)] mt-0.5 leading-relaxed"
+                                >
+                                    {{ contact.address }}
                                 </p>
                             </div>
                         </div>
+
+                        <!-- Email -->
                         <div class="flex items-center gap-3 md:gap-4">
                             <div
                                 class="w-9 h-9 rounded-lg bg-[var(--color-forest-muted)] dark:bg-white/10 flex items-center justify-center flex-shrink-0"
@@ -99,7 +137,7 @@ import BlurText from "~/components/bits/BlurText.vue";
                                     width="16"
                                     height="16"
                                     viewBox="0 0 256 256"
-                                    class="fill-[var(--color-forest-light)]"
+                                    class="fill-[var(--color-forest)] dark:fill-[var(--color-forest-light)]"
                                 >
                                     <path
                                         d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,127.72,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"
@@ -108,17 +146,19 @@ import BlurText from "~/components/bits/BlurText.vue";
                             </div>
                             <div>
                                 <p
-                                    class="text-xs font-bold uppercase tracking-widest text-[var(--color-husk-light)]"
+                                    class="label-caps dark:!text-[var(--color-husk-light)]"
                                 >
                                     Email
                                 </p>
                                 <a
-                                    href="mailto:export@agronusa.co.id"
-                                    class="text-sm text-[var(--color-forest-light)] hover:underline mt-0.5 block"
-                                    >export@agronusa.co.id</a
+                                    :href="`mailto:${contact.email}`"
+                                    class="text-sm text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:underline mt-0.5 block leading-relaxed"
+                                    >{{ contact.email }}</a
                                 >
                             </div>
                         </div>
+
+                        <!-- WhatsApp -->
                         <div class="flex items-center gap-3 md:gap-4">
                             <div
                                 class="w-9 h-9 rounded-lg bg-[#25D366]/10 flex items-center justify-center flex-shrink-0"
@@ -137,26 +177,48 @@ import BlurText from "~/components/bits/BlurText.vue";
                             </div>
                             <div>
                                 <p
-                                    class="text-xs font-bold uppercase tracking-widest text-[var(--color-husk-light)]"
+                                    class="label-caps dark:!text-[var(--color-husk-light)]"
                                 >
                                     WhatsApp
                                 </p>
                                 <a
-                                    href="https://wa.me/6281234567890"
+                                    :href="contact.whatsappLink"
                                     target="_blank"
-                                    class="text-sm text-[var(--color-forest-light)] hover:underline mt-0.5 block"
-                                    >+62 812 3456 7890</a
+                                    class="text-sm text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:underline mt-0.5 block leading-relaxed"
+                                    >{{ contact.whatsapp }}</a
                                 >
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-5 pt-4 border-t border-white/10">
+                    <!-- Social Media -->
+                    <div v-if="Object.keys(social).length" class="mt-5 pt-4 border-t border-[var(--color-ink)]/8 dark:border-white/10">
+                        <p
+                            class="label-caps dark:!text-[var(--color-husk-light)] mb-3"
+                        >Follow Us</p>
+                        <div class="flex items-center gap-3">
+                            <a
+                                v-for="(url, platform) in social"
+                                :key="platform"
+                                :href="url"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="w-9 h-9 rounded-lg bg-[var(--color-ink)]/5 dark:bg-white/10 flex items-center justify-center hover:bg-[var(--color-forest)]/10 dark:hover:bg-white/20 transition-all"
+                                :aria-label="platform"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256" class="fill-[var(--color-forest)] dark:fill-[var(--color-forest-light)]">
+                                    <path :d="socialPaths[platform] || ''" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-[var(--color-ink)]/8 dark:border-white/10">
                         <Button
                             variant="whatsapp"
                             size="md"
                             class="w-full justify-center"
-                            href="https://wa.me/6281234567890"
+                            :href="contact.whatsappLink"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"

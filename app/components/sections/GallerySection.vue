@@ -4,6 +4,7 @@ import type { GalleryItem } from '~/types'
 import Section from '~/components/common/Section.vue'
 import Masonry from '~/components/bits/Masonry.vue'
 import BlurText from '~/components/bits/BlurText.vue'
+import SplitText from '~/components/bits/SplitText.vue'
 
 const supabase = useSupabase()
 
@@ -51,13 +52,25 @@ onMounted(async () => {
   <Section id="gallery">
     <div class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full section-content h-full flex flex-col">
       <!-- Numbered Header -->
-      <div class="section-header animate-entry flex-shrink-0">
-        <span class="section-number">03 &mdash; Gallery</span>
-        <span class="section-divider" />
+      <div class="mb-3 flex-shrink-0">
+        <SplitText
+          text="04 &mdash; Gallery"
+          className="section-number block"
+          :delay="80"
+          :duration="0.5"
+          ease="power3.out"
+          split-type="chars"
+          :from="{ opacity: 0, y: 30 }"
+          :to="{ opacity: 1, y: 0 }"
+          :threshold="0.1"
+          root-margin="-100px"
+          text-align="left"
+        />
+        <span class="section-divider mt-2 block" />
       </div>
 
       <!-- Section Title -->
-      <div class="animate-entry delay-1 flex-shrink-0 ">
+      <div class="animate-entry delay-1 flex-shrink-0">
         <BlurText
           text="Our Facilities"
           className="headline-md mb-3"
@@ -122,11 +135,11 @@ onMounted(async () => {
 
           <div class="max-w-5xl w-full mx-6 text-center">
             <img :key="galleryIndex" :src="masonryItems[galleryIndex].img" :alt="masonryItems[galleryIndex].text" class="w-full max-h-[70vh] object-contain rounded-xl" />
-            <div class="mt-4">
-              <p class="text-white text-lg font-medium">{{ masonryItems[galleryIndex].text }}</p>
-              <p v-if="masonryItems[galleryIndex].description" class="text-white/40 text-sm mt-1">{{ masonryItems[galleryIndex].description }}</p>
-              <div class="flex items-center justify-center gap-2 mt-4">
-                <span v-for="(_, idx) in filtered" :key="idx" :class="['h-1.5 rounded-full transition-all duration-500', idx === galleryIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/30']" />
+            <div class="mt-5">
+              <p class="text-white text-lg font-semibold">{{ masonryItems[galleryIndex].text }}</p>
+              <p v-if="masonryItems[galleryIndex].description" class="text-white/70 text-sm mt-1.5">{{ masonryItems[galleryIndex].description }}</p>
+              <div class="flex items-center justify-center gap-2 mt-5">
+                <span v-for="(_, idx) in masonryItems" :key="idx" :class="['h-1.5 rounded-full transition-all duration-500', idx === galleryIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/30']" />
               </div>
             </div>
           </div>
