@@ -22,6 +22,17 @@ const filteredProducts = computed(() =>
     products.value.filter((p) => p.category === activeCategory.value),
 );
 
+const { supportsVideo } = useMediaSupport();
+const activeIndex = ref(0);
+
+function onSlideChange(e: Event) {
+    activeIndex.value = (e.target as any)?.activeIndex ?? 0;
+}
+
+watch(activeCategory, () => {
+    activeIndex.value = 0;
+});
+
 function openGallery(product: Product) {
     galleryMedia.value = product.media || [];
     galleryTitle.value = product.name;
@@ -45,7 +56,7 @@ onMounted(async () => {
 
 <template>
     <Section id="products" class="overflow-hidden !pb-0 md:!pb-0">
-        <div class="flex flex-col h-full w-full">
+        <div class="flex flex-col w-full flex-1 min-h-0">
             <!-- Header area (flex-shrink-0, contained) -->
             <div
                 class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full flex-shrink-0 pt-2 md:pt-4"
@@ -135,10 +146,11 @@ onMounted(async () => {
                     slides-per-view="1"
                     speed="500"
                     grab-cursor
+                    @slidechange="onSlideChange"
                     class="h-full w-full product-swiper"
                 >
                     <swiper-slide
-                        v-for="product in filteredProducts"
+                        v-for="(product, index) in filteredProducts"
                         :key="product.id"
                         class="h-full"
                     >
@@ -214,8 +226,9 @@ onMounted(async () => {
                                 class="relative h-full overflow-hidden bg-[var(--color-parchment-dim)] dark:bg-[var(--color-charcoal-raised-higher)]"
                             >
                                 <video
-                                    v-if="product.video_url"
+                                    v-if="supportsVideo && index === activeIndex && product.video_url"
                                     autoplay
+                                    preload="none"
                                     muted
                                     loop
                                     playsinline

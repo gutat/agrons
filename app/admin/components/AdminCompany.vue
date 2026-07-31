@@ -5,11 +5,14 @@ const supabase = useSupabase()
 
 const form = reactive({
   name: '',
-  tagline: '',
-  mission: '',
-  vision: '',
-  values: '',
-  description: '',
+  logo_url: '',
+  contact: {
+    address: '',
+    phone: '',
+    email: '',
+    whatsapp: '',
+  },
+  social: {} as Record<string, string>,
 })
 const loading = ref(true)
 const saving = ref(false)
@@ -19,69 +22,110 @@ onMounted(async () => {
   const { data } = await supabase.from('company_info').select('*').single()
   if (data) {
     form.name = data.name || ''
-    form.tagline = data.tagline || ''
-    form.mission = data.mission || ''
-    form.vision = data.vision || ''
-    form.values = data.values ? JSON.stringify(data.values, null, 2) : '[]'
-    form.description = data.description || ''
+    form.logo_url = data.logo_url || ''
+    form.contact = { address: '', phone: '', email: '', whatsapp: '', ...(data.contact || {}) }
+    form.social = data.social || {}
   }
   loading.value = false
 })
 
 async function save() {
   saving.value = true
-  let values: any[]
-  try { values = JSON.parse(form.values) } catch { values = [] }
+  const contact = form.contact
+  const social = form.social
   await supabase.from('company_info').update({
     name: form.name,
-    tagline: form.tagline,
-    mission: form.mission,
-    vision: form.vision,
-    values,
-    description: form.description,
+    logo_url: form.logo_url || null,
+    contact,
+    social,
   }).eq('id', 1)
   saving.value = false
   saved.value = true
+  setTimeout(() => saved.value = false, 3000)
 }
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">Company Profile</h1>
+    <div style="margin-bottom: 28px;">
+      <h1 style="font-family: 'Source Serif 4', serif; font-size: 24px; font-weight: 700; color: #1B3022; margin: 0;">Company Info</h1>
+      <p style="font-size: 14px; color: #737973; margin: 4px 0 0;">Manage company name, logo, contact details, and social media links</p>
+    </div>
 
-    <div v-if="loading" class="text-center py-8 text-neutral-500">Loading...</div>
+    <div v-if="loading" style="text-align: center; padding: 48px 0;">
+      <div style="width: 28px; height: 28px; border: 2px solid #1B3022; border-top-color: transparent; border-radius: 50%; animation: adminSpin 0.6s linear infinite; margin: 0 auto;"></div>
+    </div>
 
-    <form v-else @submit.prevent="save" class="max-w-2xl space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Company Name</label>
-          <input v-model="form.name" class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800" />
+    <form v-else @submit.prevent="save" style="max-width: 720px; display: flex; flex-direction: column; gap: 20px;">
+      <!-- Name + Logo -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Company Name</label>
+          <input v-model="form.name"
+            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"
+            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
+            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
+          />
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Tagline</label>
-          <input v-model="form.tagline" class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800" />
+        <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Logo URL</label>
+          <input v-model="form.logo_url" placeholder="https://..."
+            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"
+            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
+            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
+          />
         </div>
       </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Mission</label>
-        <textarea v-model="form.mission" rows="2" class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Vision</label>
-        <textarea v-model="form.vision" rows="2" class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">Values (JSON array)</label>
-        <textarea v-model="form.values" rows="6" class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 font-mono text-sm"></textarea>
+
+      <!-- Contact Info -->
+      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 14px;">Contact Info</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Address</label>
+            <input v-model="form.contact.address" placeholder="e.g. Pekanbaru, Indonesia"
+              style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+            />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Phone</label>
+            <input v-model="form.contact.phone" placeholder="e.g. +62"
+              style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+            />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Email</label>
+            <input v-model="form.contact.email" type="email" placeholder="e.g. export@agronusa.co.id"
+              style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+            />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">WhatsApp</label>
+            <input v-model="form.contact.whatsapp" placeholder="e.g. +62"
+              style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+            />
+          </div>
+        </div>
       </div>
 
-      <div class="flex gap-3 pt-4">
-        <button type="submit" :disabled="saving" class="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50">
-          {{ saving ? 'Saving...' : 'Save' }}
-        </button>
+      <!-- Social Media Links -->
+      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
+        <KeyValueEditor v-model="form.social" title="Social Media Links" key-placeholder="platform (e.g. linkedin)" value-placeholder="url (e.g. https://linkedin.com/company/...)" />
       </div>
 
-      <p v-if="saved" class="text-green-600 text-sm font-medium">Saved successfully!</p>
+      <!-- Save -->
+      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: flex; align-items: center; justify-content: flex-end;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span v-if="saved" style="font-size: 13px; font-weight: 600; color: #2E7D32;">Saved successfully!</span>
+          <button type="submit" :disabled="saving"
+            style="padding: 12px 28px; border: none; border-radius: 12px; background: #1B3022; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+            :style="saving ? 'opacity: 0.6; cursor: not-allowed;' : ''"
+            @mouseenter="!saving && ($el.style.opacity='0.9')" @mouseleave="!saving && ($el.style.opacity='1')"
+          >
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 </template>

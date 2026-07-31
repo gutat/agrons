@@ -22,6 +22,26 @@ const section = ref({
 const loading = ref(true);
 
 const hasMediaBg = computed(() => !!(section.value.hero_image_url || section.value.hero_video_url));
+const { supportsVideo } = useMediaSupport();
+const videoInView = ref(false);
+
+onMounted(() => {
+    const el = document.getElementById("about");
+    if (!el || typeof IntersectionObserver === "undefined") {
+        videoInView.value = true;
+        return;
+    }
+    const io = new IntersectionObserver(
+        (entries) => {
+            if (entries[0]?.isIntersecting) {
+                videoInView.value = true;
+                io.disconnect();
+            }
+        },
+        { threshold: 0.05, rootMargin: "200px" },
+    );
+    io.observe(el);
+});
 
 onMounted(async () => {
     const { data } = await supabase
@@ -48,8 +68,9 @@ onUnmounted(() => {
     <Section id="about" class="relative overflow-hidden" :dark="hasMediaBg">
         <!-- Background video -->
         <video
-            v-if="section.hero_video_url"
+            v-if="supportsVideo && videoInView && section.hero_video_url"
             autoplay
+            preload="none"
             muted
             loop
             playsinline

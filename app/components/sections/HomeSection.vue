@@ -14,7 +14,8 @@ const section = ref({
     company_name: "PT Agro Nusa Sejahtera",
     tagline: "Premium Cocopeat & Cocofiber from Indonesia",
     description: "",
-    subtitle: "Sustainable, high-quality coconut-based growing media for global agriculture.",
+    subtitle:
+        "Sustainable, high-quality coconut-based growing media for global agriculture.",
     hero_video_url: undefined as string | undefined,
     hero_image_url: undefined as string | undefined,
 });
@@ -24,10 +25,23 @@ const posterUrl = computed(() => {
     return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Crect fill='%231B3022' width='640' height='640'/%3E%3C/svg%3E";
 });
 
+const { supportsVideo } = useMediaSupport();
+const readyToPlay = ref(false);
+
+onMounted(() => {
+    const start = () => {
+        readyToPlay.value = true;
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+});
+
 onMounted(async () => {
     const { data } = await supabase
         .from("home_section")
-        .select("company_name, tagline, description, subtitle, hero_video_url, hero_image_url")
+        .select(
+            "company_name, tagline, description, subtitle, hero_video_url, hero_image_url",
+        )
         .eq("published", true)
         .single();
     if (data) section.value = { ...section.value, ...data };
@@ -43,8 +57,9 @@ onMounted(async () => {
             style="z-index: 0"
         >
             <video
-                v-if="section.hero_video_url"
+                v-if="supportsVideo && readyToPlay && section.hero_video_url"
                 autoplay
+                preload="metadata"
                 muted
                 loop
                 playsinline
@@ -61,10 +76,7 @@ onMounted(async () => {
                 class="absolute inset-0 w-full h-full object-cover"
                 style="filter: saturate(0.7) brightness(0.5)"
             />
-            <div
-                v-else
-                class="absolute inset-0 bg-[var(--color-forest)]"
-            ></div>
+            <div v-else class="absolute inset-0 bg-[var(--color-forest)]"></div>
             <!-- Neutral dark overlay — lets video/image colors show through -->
             <div
                 class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"
@@ -137,7 +149,7 @@ onMounted(async () => {
                     />
 
                     <h1
-                        class="display-lg mt-6 md:mt-10 mb-3 md:mb-4 leading-[1.08]"
+                        class="display-lg mt-4 md:mt-10 mb-2 md:mb-4 leading-[1.08] home-headline"
                     >
                         <SplitText
                             text="Premium"
@@ -154,13 +166,13 @@ onMounted(async () => {
                             text-align="left"
                         />
                         <span
-                            class="inline-block min-w-[200px] md:min-w-[280px] text-left relative"
+                            class="inline-block min-w-[140px] md:min-w-[280px] text-left relative"
                         >
                             <RotatingText
                                 :texts="[
                                     'Cocopeat',
                                     'Cocofiber',
-                                    'Sustainable Fiber',
+                                    'Derivatives',
                                 ]"
                                 :rotation-interval="2800"
                                 split-by="characters"
@@ -178,33 +190,24 @@ onMounted(async () => {
                                 element-level-class-name="text-[var(--color-husk-light)]"
                             />
                         </span>
-                                                <br /><SplitText
-                                                    text="from Indonesia"
-                                                    tag="span"
-                                                    className="inline text-white tracking-wide"
-                                                    split-type="chars"
-                                                    :delay="60"
-                                                    :duration="0.4"
-                                                    ease="power3.out"
-                                                    :from="{ opacity: 0, y: 20 }"
-                                                    :to="{ opacity: 1, y: 0 }"
-                                                    :threshold="0.3"
-                                                    root-margin="-50px"
-                                                    text-align="left"
-                                                />
+                        <br /><SplitText
+                            text="from Indonesia"
+                            tag="span"
+                            className="inline text-white tracking-wide"
+                            split-type="chars"
+                            :delay="60"
+                            :duration="0.4"
+                            ease="power3.out"
+                            :from="{ opacity: 0, y: 20 }"
+                            :to="{ opacity: 1, y: 0 }"
+                            :threshold="0.3"
+                            root-margin="-50px"
+                            text-align="left"
+                        />
                     </h1>
 
-                    <BlurText
-                        :text="section.subtitle"
-                        className="!text-white/75 body-lg leading-relaxed max-w-xl !mt-6 text-left"
-                        :delay="120"
-                        :step-duration="0.3"
-                        animate-by="words"
-                        direction="bottom"
-                    />
-
                     <div
-                        class="flex flex-wrap items-center gap-5 mt-10 md:mt-16"
+                        class="flex flex-wrap items-center gap-4 mt-6 md:mt-16"
                     >
                         <StarBorder
                             as="a"
@@ -254,5 +257,19 @@ onMounted(async () => {
 .explore-btn :deep(> div:last-child) {
     background: var(--color-forest) !important;
     border-color: transparent !important;
+}
+
+/* Compact hero on small screens — content must fit within the snapped viewport */
+@media (max-width: 767px) {
+    .home-headline {
+        font-size: clamp(26px, 7.5vw, 34px) !important;
+        letter-spacing: -0.01em !important;
+    }
+}
+
+@media (max-height: 700px) and (max-width: 767px) {
+    .home-headline {
+        font-size: clamp(22px, 6.5vw, 28px) !important;
+    }
 }
 </style>

@@ -70,7 +70,11 @@ body {
 
 /* ===== Scroll Snap Sections ===== */
 .section {
-  height: 100dvh;
+  /* Sections may grow taller than the viewport when content needs it;
+     scroll-snap still aligns each section's top edge. svh (small viewport)
+     keeps content visible on phones with a visible browser toolbar. */
+  min-height: 100vh;
+  min-height: 100svh;
   min-height: 100dvh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
@@ -83,8 +87,17 @@ body {
   background-color: var(--color-parchment);
 }
 
+@media (max-width: 767px) {
+  .section { padding: 56px 0 24px; }
+}
+
 @media (min-width: 768px) {
   .section { padding: 80px 0 60px; }
+}
+
+/* Short phone screens (e.g. Samsung M20-class): compress further */
+@media (max-height: 700px) and (max-width: 767px) {
+  .section { padding: 48px 0 16px; }
 }
 
 .dark .section {

@@ -1,0 +1,25 @@
+# ============================================================
+# uploads/.htaccess — place this file in public_html/uploads/
+# (upload it manually once; CI excludes uploads/ from deploys)
+# ============================================================
+
+# 1) No script execution — uploaded files must never run
+php_flag engine off
+<FilesMatch "\.(php|phtml|php5|phar|cgi|pl|py|sh|asp|aspx|jsp)$">
+  Require all denied
+</FilesMatch>
+
+# 2) No directory listing
+Options -Indexes
+
+# 3) Long cache — files are immutable (timestamp-named)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/* "access plus 1 year"
+  ExpiresByType video/* "access plus 1 year"
+</IfModule>
+
+# 4) MIME spoofing defense
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>

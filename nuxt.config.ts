@@ -27,6 +27,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
+        { rel: "icon", type: "image/png", href: "/logo.png" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },
         { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Hanken+Grotesk:wght@400;700&display=swap" },
