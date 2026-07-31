@@ -6,17 +6,40 @@ const supabase = useSupabase()
 
 const products = ref<Product[]>([])
 const loading = ref(true)
+const togglingId = ref<string | null>(null)
+const deletingId = ref<string | null>(null)
 
-onMounted(async () => {
+async function loadProducts() {
+  loading.value = true
   const { data } = await supabase.from('products').select('*').order('sort_order')
   if (data) products.value = data
   loading.value = false
-})
+}
+
+async function togglePublished(product: Product) {
+  togglingId.value = product.id
+  await supabase
+    .from('products')
+    .update({ published: !product.published })
+    .eq('id', product.id)
+  product.published = !product.published
+  togglingId.value = null
+}
+
+async function deleteProduct(product: Product) {
+  if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return
+  deletingId.value = product.id
+  await supabase.from('products').delete().eq('id', product.id)
+  products.value = products.value.filter(p => p.id !== product.id)
+  deletingId.value = null
+}
+
+onMounted(loadProducts)
 </script>
 
 <template>
   <div>
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 28px;">
       <div>
         <h1 style="font-family: 'Source Serif 4', serif; font-size: 24px; font-weight: 700; color: #1B3022; margin: 0;">Products</h1>
         <p style="font-size: 14px; color: #737973; margin: 4px 0 0;">Manage your cocopeat and cocofiber products</p>
@@ -38,19 +61,20 @@ onMounted(async () => {
       <NuxtLink to="./products/new" style="color: #1B3022; font-weight: 600; font-size: 14px; margin-top: 8px; display: inline-block;">Add your first product →</NuxtLink>
     </div>
 
-    <div v-else style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); overflow: hidden;">
+    <div v-else class="adm-table-wrap" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08);">
       <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
         <thead>
           <tr style="background: #F7FAFB;">
             <th style="text-align: left; padding: 14px 20px; font-weight: 600; color: #434843; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Name</th>
             <th style="text-align: left; padding: 14px 20px; font-weight: 600; color: #434843; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Category</th>
-            <th style="text-align: left; padding: 14px 20px; font-weight: 600; color: #434843; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Published</th>
+            <th style="text-align: left; padding: 14px 20px; font-weight: 600; color: #434843; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Status</th>
             <th style="text-align: right; padding: 14px 20px; font-weight: 600; color: #434843; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="p in products" :key="p.id"
             style="border-top: 1px solid rgba(24,28,29,0.06); transition: background 0.15s;"
+            :style="!p.published ? 'opacity: 0.55;' : ''"
             @mouseenter="$el.style.background='rgba(27,48,34,0.02)'" @mouseleave="$el.style.background='transparent'"
           >
             <td style="padding: 14px 20px; font-weight: 500; color: #181C1D;">{{ p.name }}</td>
@@ -62,10 +86,29 @@ onMounted(async () => {
               <span v-else style="color: #737973; font-size: 12px; font-weight: 600;">○ Draft</span>
             </td>
             <td style="padding: 14px 20px; text-align: right;">
-              <NuxtLink :to="`./products/${p.id}`"
-                style="padding: 6px 16px; border-radius: 8px; background: rgba(27,48,34,0.08); color: #1B3022; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.15s;"
-                @mouseenter="$el.style.background='#1B3022'; $el.style.color='white'" @mouseleave="$el.style.background='rgba(27,48,34,0.08)'; $el.style.color='#1B3022'"
-              >Edit</NuxtLink>
+              <div class="adm-actions" style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                <!-- Publish/Draft toggle -->
+                <button @click="togglePublished(p)" :disabled="togglingId === p.id"
+                  style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(24,28,29,0.1); background: transparent; color: #434843; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;"
+                  :style="togglingId === p.id ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+                  @mouseenter="togglingId !== p.id && ($el.style.background='rgba(27,48,34,0.06)')" @mouseleave="togglingId !== p.id && ($el.style.background='transparent')"
+                >
+                  {{ togglingId === p.id ? '...' : (p.published ? 'Disable' : 'Enable') }}
+                </button>
+                <!-- Edit -->
+                <NuxtLink :to="`./products/${p.id}`"
+                  style="padding: 6px 14px; border-radius: 8px; background: rgba(27,48,34,0.08); color: #1B3022; font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.15s;"
+                  @mouseenter="$el.style.background='#1B3022'; $el.style.color='white'" @mouseleave="$el.style.background='rgba(27,48,34,0.08)'; $el.style.color='#1B3022'"
+                >Edit</NuxtLink>
+                <!-- Delete -->
+                <button @click="deleteProduct(p)" :disabled="deletingId === p.id"
+                  style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(186,26,26,0.15); background: transparent; color: #BA1A1A; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;"
+                  :style="deletingId === p.id ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+                  @mouseenter="deletingId !== p.id && ($el.style.background='rgba(186,26,26,0.06)')" @mouseleave="deletingId !== p.id && ($el.style.background='transparent')"
+                >
+                  {{ deletingId === p.id ? '...' : 'Delete' }}
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

@@ -135,7 +135,7 @@ const inactiveDotStyle = computed(() => ({
                 @click.prevent="onNavClick('home')"
             >
                 <img src="/logo.png" alt="Agro Nusa" class="h-8 w-auto" />
-                <span class="hidden sm:inline text-sm md:text-base font-semibold text-[var(--color-forest)] dark:text-[var(--color-forest-light)] leading-none">Agro Nusa Sejahtera</span>
+                <span class="sm:inline text-sm md:text-base font-semibold  leading-none">Agro Nusa Sejahtera</span>
             </a>
 
             <div class="hidden md:flex items-center gap-2 self-stretch">
@@ -156,9 +156,9 @@ const inactiveDotStyle = computed(() => ({
                     :colors="[1, 2, 3, 4, 5, 1, 2, 3, 4, 5]"
                     style="color: white"
                 />
-                <div class="flex items-center gap-1">
+                <!-- <div class="flex items-center gap-1">
                     <ThemeSwitcher />
-                </div>
+                </div> -->
             </div>
 
             <!-- Mobile: StaggeredMenu -->

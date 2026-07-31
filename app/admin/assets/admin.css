@@ -1,0 +1,111 @@
+/* ============================================================
+   Admin responsive helpers (mobile-friendly)
+   Imported once in app/admin/layouts/admin.vue
+   ============================================================ */
+
+/* --- Mobile hamburger button (hidden on desktop, shown on phones) --- */
+.adm-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(24, 28, 29, 0.1);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.adm-hamburger:hover {
+  background: rgba(27, 48, 34, 0.05);
+}
+
+/* --- Top bar: on phones, hide the inline nav (drawer replaces it) --- */
+@media (max-width: 900px) {
+  .adm-nav {
+    display: none !important;
+  }
+  .adm-hamburger {
+    display: flex;
+  }
+  .adm-user-menu {
+    display: none !important;
+  }
+}
+
+/* --- Mobile drawer (aside) --- */
+.adm-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 85vw;
+  background: #fff;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  box-shadow: 0 0 40px rgba(24, 28, 29, 0.15);
+}
+.adm-drawer.open {
+  transform: translateX(0);
+}
+
+/* --- Drawer backdrop --- */
+.adm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 28, 29, 0.45);
+  z-index: 65;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.adm-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 480px) {
+  .adm-brand-text {
+    display: none;
+  }
+}
+
+/* --- Main content: tighter padding on phones --- */
+@media (max-width: 640px) {
+  .adm-main {
+    padding: 16px !important;
+  }
+}
+
+/* --- Form grids: stack to one column on phones --- */
+@media (max-width: 640px) {
+  .adm-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* --- Tables: horizontal scroll instead of squishing --- */
+.adm-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- Action button rows: allow wrapping on narrow screens --- */
+@media (max-width: 640px) {
+  .adm-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+  }
+}
+
+/* --- Dashboard stat cards: two columns on very small screens --- */
+@media (max-width: 480px) {
+  .adm-stats {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

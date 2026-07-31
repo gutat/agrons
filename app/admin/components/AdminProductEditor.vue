@@ -2,6 +2,8 @@
 import { useSupabase } from '~/utils/supabase'
 import type { Product, ProductMedia } from '~/types'
 import { useStorage } from '~/composables/useStorage'
+import SpecsEditor from '~/admin/components/editors/SpecsEditor.vue'
+import TagsEditor from '~/admin/components/editors/TagsEditor.vue'
 
 const supabase = useSupabase()
 const { uploadFile, deleteFile } = useStorage()
@@ -30,6 +32,7 @@ const saving = ref(false)
 const saved = ref(false)
 const uploadState = ref<'idle' | 'uploading'>('idle')
 const mediaType = ref<'image' | 'video'>('image')
+const newMediaUrl = ref('')
 
 async function loadProduct() {
   const { data } = await supabase.from('products').select('*').eq('id', props.id).single()
@@ -76,6 +79,13 @@ async function handleFileUpload(event: Event) {
   }
   uploadState.value = 'idle'
   input.value = ''
+}
+
+function addMediaByUrl() {
+  const url = newMediaUrl.value.trim()
+  if (!url) return
+  form.media.push({ type: mediaType.value, url })
+  newMediaUrl.value = ''
 }
 
 async function removeMedia(index: number) {
@@ -142,7 +152,7 @@ onMounted(() => { if (!isNew) loadProduct() })
 
     <form v-else @submit.prevent="save" style="max-width: 720px; display: flex; flex-direction: column; gap: 20px;">
       <!-- Name + Category -->
-      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Name *</label>
           <input v-model="form.name" required
@@ -165,7 +175,7 @@ onMounted(() => { if (!isNew) loadProduct() })
       </div>
 
       <!-- Slug + Origin -->
-      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Slug *</label>
           <input v-model="form.slug" required
@@ -205,7 +215,7 @@ onMounted(() => { if (!isNew) loadProduct() })
       </div>
 
       <!-- Thumbnail + Video -->
-      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Thumbnail URL</label>
           <input v-model="form.thumbnail" placeholder="https://..."
@@ -250,6 +260,18 @@ onMounted(() => { if (!isNew) loadProduct() })
           </div>
         </div>
 
+        <!-- Add by URL -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <input v-model="newMediaUrl" placeholder="Or paste an image/video URL (https://...) and click Add URL"
+            style="flex: 1; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 13px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+            @keydown.enter.prevent="addMediaByUrl"
+          />
+          <button type="button" @click="addMediaByUrl"
+            style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(27,48,34,0.2); background: transparent; color: #1B3022; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;"
+            @mouseenter="$el.style.background='rgba(27,48,34,0.06)'" @mouseleave="$el.style.background='transparent'"
+          >Add URL</button>
+        </div>
+
         <div v-if="form.media.length === 0" style="text-align: center; padding: 32px; background: #F7FAFB; border-radius: 12px; border: 1px dashed rgba(24,28,29,0.15);">
           <p style="font-size: 13px; color: #737973; margin: 0;">No media yet. Click "+ Add" to upload an image or video.</p>
         </div>
@@ -288,7 +310,7 @@ onMounted(() => { if (!isNew) loadProduct() })
       </div>
 
       <!-- MOQ + Lead Time -->
-      <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">MOQ</label>
           <input v-model="form.moq" placeholder="e.g. 100 kg"

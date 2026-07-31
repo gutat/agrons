@@ -5,6 +5,7 @@ import TrueFocus from "~/components/bits/TrueFocus.vue";
 import BlurText from "~/components/bits/BlurText.vue";
 import ShinyText from "~/components/bits/ShinyText.vue";
 import SplitText from "~/components/bits/SplitText.vue";
+import ValueIcon from "~/components/bits/ValueIcon.vue";
 
 const supabase = useSupabase();
 
@@ -172,15 +173,22 @@ onUnmounted(() => {
                         :key="v.title"
                         class="flex flex-col gap-1"
                     >
-                        <ShinyText
-                            :text="v.icon + ' ' + v.title"
-                            :speed="1.5"
-                            :color="hasMediaBg ? 'rgba(255,255,255,0.85)' : 'var(--color-ink-muted)'"
-                            shine-color="var(--color-forest)"
-                            :spread="120"
-                            direction="left"
-                            class="text-xs md:text-sm font-semibold uppercase tracking-[0.1em]"
-                        />
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0 bg-[var(--color-forest-muted)] dark:bg-white/10 text-[var(--color-forest)] dark:text-[var(--color-husk-light)]"
+                            >
+                                <ValueIcon :name="v.icon" :size="14" />
+                            </span>
+                            <ShinyText
+                                :text="v.title"
+                                :speed="1.5"
+                                :color="hasMediaBg ? 'rgba(255,255,255,0.85)' : 'var(--color-ink-muted)'"
+                                shine-color="var(--color-forest)"
+                                :spread="120"
+                                direction="left"
+                                class="text-xs md:text-sm font-semibold uppercase tracking-[0.1em]"
+                            />
+                        </div>
                         <span
                             class="text-xs md:text-sm leading-relaxed text-[var(--color-ink-muted)] dark:text-white/70"
                         >{{ v.description }}</span>

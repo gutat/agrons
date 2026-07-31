@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from '~/utils/supabase'
+import KeyValueEditor from '~/admin/components/editors/KeyValueEditor.vue'
 
 const supabase = useSupabase()
 
@@ -58,7 +59,7 @@ async function save() {
 
     <form v-else @submit.prevent="save" style="max-width: 720px; display: flex; flex-direction: column; gap: 20px;">
       <!-- Name + Logo -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Company Name</label>
           <input v-model="form.name"
@@ -80,7 +81,7 @@ async function save() {
       <!-- Contact Info -->
       <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
         <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 14px;">Contact Info</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
           <div>
             <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Address</label>
             <input v-model="form.contact.address" placeholder="e.g. Pekanbaru, Indonesia"

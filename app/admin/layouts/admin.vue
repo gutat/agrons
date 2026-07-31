@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '~/admin/assets/admin.css'
 import { useSupabase } from '~/utils/supabase'
 import AdminDashboard from '~/admin/components/AdminDashboard.vue'
 import AdminProducts from '~/admin/components/AdminProducts.vue'
@@ -24,6 +25,14 @@ const email = ref('')
 const password = ref('')
 const authError = ref('')
 const showUserMenu = ref(false)
+const mobileNavOpen = ref(false)
+
+watch(mobileNavOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
 
 async function checkSession() {
   const { data } = await supabase.auth.getSession()
@@ -63,7 +72,7 @@ function navClass(path: string) {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <h1 style="font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 700; color: #1B3022; margin: 0;">Admin Login</h1>
-          <p style="font-size: 14px; color: #737973; margin-top: 4px;">PT Agro Nusa Sejahtera</p>
+          <p style="font-size: 14px; color: #737973; margin-top: 4px;">PT Agro Nusa Sejahtera Sejahtera</p>
         </div>
         <form @submit.prevent="signIn" style="display: flex; flex-direction: column; gap: 16px;">
           <div>
@@ -94,16 +103,19 @@ function navClass(path: string) {
       <!-- Top Bar Navigation -->
       <header style="position: sticky; top: 0; z-index: 50; backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); background: rgba(255,255,255,0.85); border-bottom: 1px solid rgba(24,28,29,0.06); box-shadow: 0 4px 24px rgba(24,28,29,0.04);">
         <div style="max-width: 1440px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between;">
-          <!-- Left: Logo + Company Name -->
+          <!-- Left: Hamburger (mobile) + Logo + Company Name -->
+          <button class="adm-hamburger" @click="mobileNavOpen = !mobileNavOpen" aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#181C1D" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
           <NuxtLink :to="`/${adminPath}/dashboard`" style="display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0;">
             <div style="width: 36px; height: 36px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
-            <span style="font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 700; color: #1B3022; white-space: nowrap;">Agro Nusa</span>
+            <span class="adm-brand-text" style="font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 700; color: #1B3022; white-space: nowrap;">Agro Nusa Sejahtera</span>
           </NuxtLink>
 
-          <!-- Center: Nav Menu -->
-          <nav style="display: flex; align-items: center; gap: 4px;">
+          <!-- Center: Nav Menu (desktop only; drawer on mobile) -->
+          <nav class="adm-nav" style="display: flex; align-items: center; gap: 4px;">
             <NuxtLink :to="`/${adminPath}/dashboard`" :class="navClass('dashboard')">Dashboard</NuxtLink>
             <NuxtLink :to="`/${adminPath}/products`" :class="navClass('products')">Products</NuxtLink>
             <NuxtLink :to="`/${adminPath}/gallery`" :class="navClass('gallery')">Gallery</NuxtLink>
@@ -113,8 +125,8 @@ function navClass(path: string) {
             <NuxtLink :to="`/${adminPath}/messages`" :class="navClass('messages')">Messages</NuxtLink>
           </nav>
 
-          <!-- Right: User Avatar + Name + Sign Out -->
-          <div style="position: relative; flex-shrink: 0;">
+          <!-- Right: User Avatar + Name + Sign Out (desktop only; drawer has sign out on mobile) -->
+          <div class="adm-user-menu" style="position: relative; flex-shrink: 0;">
             <button @click="showUserMenu = !showUserMenu"
               style="display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; border: 1px solid rgba(24,28,29,0.08); border-radius: 100px; background: transparent; cursor: pointer; transition: all 0.2s;"
               @mouseenter="$el.style.background='rgba(27,48,34,0.04)'" @mouseleave="$el.style.background='transparent'">
@@ -142,8 +154,42 @@ function navClass(path: string) {
         </div>
       </header>
 
+      <!-- Mobile drawer (aside) + backdrop -->
+      <Teleport to="body">
+        <aside class="adm-drawer" :class="{ open: mobileNavOpen }">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(24,28,29,0.06); flex-shrink: 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <span style="font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; color: #1B3022; white-space: nowrap;">Agro Nusa Sejahtera</span>
+            </div>
+            <button @click="mobileNavOpen = false" aria-label="Close menu" style="width: 34px; height: 34px; border-radius: 8px; border: none; background: rgba(24,28,29,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#434843" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+            </button>
+          </div>
+          <nav style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 4px;">
+            <NuxtLink :to="`/${adminPath}/dashboard`" :class="navClass('dashboard')" @click="mobileNavOpen = false">Dashboard</NuxtLink>
+            <NuxtLink :to="`/${adminPath}/products`" :class="navClass('products')" @click="mobileNavOpen = false">Products</NuxtLink>
+            <NuxtLink :to="`/${adminPath}/gallery`" :class="navClass('gallery')" @click="mobileNavOpen = false">Gallery</NuxtLink>
+            <NuxtLink :to="`/${adminPath}/home`" :class="navClass('home')" @click="mobileNavOpen = false">Home</NuxtLink>
+            <NuxtLink :to="`/${adminPath}/about`" :class="navClass('about')" @click="mobileNavOpen = false">About</NuxtLink>
+            <NuxtLink :to="`/${adminPath}/company`" :class="navClass('company')" @click="mobileNavOpen = false">Company</NuxtLink>
+            <NuxtLink :to="`/${adminPath}/messages`" :class="navClass('messages')" @click="mobileNavOpen = false">Messages</NuxtLink>
+          </nav>
+          <div style="padding: 12px; border-top: 1px solid rgba(24,28,29,0.06); flex-shrink: 0;">
+            <button @click="signOut"
+              style="width: 100%; padding: 10px 12px; border: none; border-radius: 8px; background: rgba(186,26,26,0.06); font-size: 13px; color: #BA1A1A; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BA1A1A" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </button>
+          </div>
+        </aside>
+        <div class="adm-backdrop" :class="{ open: mobileNavOpen }" @click="mobileNavOpen = false"></div>
+      </Teleport>
+
       <!-- Main content -->
-      <main style="flex: 1; padding: 32px 24px; max-width: 1440px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+      <main class="adm-main" style="flex: 1; padding: 32px 24px; max-width: 1440px; margin: 0 auto; width: 100%; box-sizing: border-box;">
         <AdminDashboard v-if="section === 'dashboard'" />
         <AdminProducts v-else-if="section === 'products' && !slug" />
         <AdminProductEditor v-else-if="section === 'products' && slug" :id="slug" />

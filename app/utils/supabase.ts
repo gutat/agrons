@@ -13,9 +13,9 @@ export function useSupabase() {
     config.public.supabaseKey,
     {
       auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-        detectSessionInUrl: false,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
         storageKey: 'agrons-supabase-key',
       },
     }

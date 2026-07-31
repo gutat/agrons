@@ -49,7 +49,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Section id="gallery">
+  <Section id="gallery" class="section-fixed">
     <div class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full section-content h-full flex flex-col">
       <!-- Numbered Header -->
       <div class="mb-3 flex-shrink-0">
@@ -95,7 +95,7 @@ onMounted(async () => {
       </div>
 
       <!-- Masonry Gallery -->
-      <div v-else-if="masonryItems.length > 0" class="animate-entry delay-3 flex-1 min-h-0 w-full mt-4">
+      <div v-else-if="masonryItems.length > 0" class="animate-entry delay-3 flex-1 min-h-0 w-full mt-4 overflow-y-auto">
         <Masonry
           :items="masonryItems"
           ease="power3.out"

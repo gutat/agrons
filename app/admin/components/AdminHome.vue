@@ -70,7 +70,7 @@ async function save() {
       </div>
 
       <!-- Tagline + Subtitle -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Tagline</label>
           <input v-model="form.tagline"
@@ -100,7 +100,7 @@ async function save() {
       </div>
 
       <!-- Hero URLs -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Hero Image URL</label>
           <input v-model="form.hero_image_url" placeholder="https://..."

@@ -55,7 +55,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Section id="products" class="overflow-hidden !pb-0 md:!pb-0">
+    <Section id="products" class="section-fixed overflow-hidden !pb-0 md:!pb-0">
         <div class="flex flex-col w-full flex-1 min-h-0">
             <!-- Header area (flex-shrink-0, contained) -->
             <div
@@ -109,7 +109,7 @@ onMounted(async () => {
                         :class="[
                             'relative text-sm md:text-base font-medium transition-all capitalize pb-1',
                             activeCategory === cat
-                                ? 'text-[var(--color-forest) dark:text-[var(--color-forest-light)]'
+                                ? 'text-white dark:text-black'
                                 : 'text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)] hover:text-[var(--color-forest)] dark:hover:text-[var(--color-forest-light)]',
                         ]"
                         @click="
@@ -140,6 +140,10 @@ onMounted(async () => {
                 v-else
                 class="flex-1 min-h-0 w-full relative animate-entry delay-3"
             >
+                <!-- Desktop: constrained to container width, centered. Mobile: full width. -->
+                <div
+                    class="h-full w-full md:max-w-(--spacing-container) md:mx-auto md:px-(--spacing-gutter)"
+                >
                 <swiper-container
                     v-if="filteredProducts.length > 0"
                     navigation="true"
@@ -166,7 +170,7 @@ onMounted(async () => {
                                     >{{ product.category }}</span
                                 >
                                 <h3
-                                    class="text-xl md:text-2xl font-semibold text-[var(--color-forest)] dark:text-[var(--color-forest-light)] mb-3"
+                                    class="text-xl md:text-2xl font-semibold mb-3"
                                 >
                                     {{ product.name }}
                                 </h3>
@@ -282,6 +286,7 @@ onMounted(async () => {
                     class="flex items-center justify-center h-full text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)]"
                 >
                     <p>No products in this category yet.</p>
+                </div>
                 </div>
             </div>
         </div>

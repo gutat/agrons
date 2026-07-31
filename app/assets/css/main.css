@@ -100,6 +100,17 @@ body {
   .section { padding: 48px 0 16px; }
 }
 
+/* Fixed-height sections (Products, Gallery): layouts like the swiper and
+   masonry rely on a definite height to fill the viewport exactly, which also
+   keeps scroll-snap deterministic. Overflow scrolls inside the section. */
+.section-fixed {
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
 .dark .section {
   background-color: var(--color-charcoal);
 }

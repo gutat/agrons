@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from '~/utils/supabase'
+import ValuesCardsEditor from '~/admin/components/editors/ValuesCardsEditor.vue'
 
 const supabase = useSupabase()
 
@@ -71,7 +72,7 @@ async function save() {
       </div>
 
       <!-- Mission + Vision -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Mission</label>
           <textarea v-model="form.mission" rows="3"
@@ -91,7 +92,7 @@ async function save() {
       </div>
 
       <!-- Hero URLs -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Background Image URL</label>
           <input v-model="form.hero_image_url" placeholder="https://..."
