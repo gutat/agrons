@@ -1,6 +1,10 @@
 import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 
+// Admin mount path — matches runtimeConfig.public.adminPath so prerendered
+// admin files land where the deployed app actually serves them.
+const adminPath = process.env.NUXT_PUBLIC_ADMIN_PATH || "admin";
+
 export default defineNuxtConfig({
   ssr: false,
   compatibilityDate: "2025-07-15",
@@ -55,14 +59,14 @@ export default defineNuxtConfig({
         "/",
         // Admin entry points: generate real files so /<adminPath> works
         // on plain static hosting (no SPA-fallback rewrites needed).
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/dashboard`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/products`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/gallery`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/home`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/about`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/company`,
-        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/messages`,
+        `/${adminPath}`,
+        `/${adminPath}/dashboard`,
+        `/${adminPath}/products`,
+        `/${adminPath}/gallery`,
+        `/${adminPath}/home`,
+        `/${adminPath}/about`,
+        `/${adminPath}/company`,
+        `/${adminPath}/messages`,
       ],
     },
   },
