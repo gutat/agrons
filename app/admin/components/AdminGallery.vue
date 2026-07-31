@@ -12,6 +12,37 @@ const showForm = ref(false)
 const editingId = ref<string | null>(null)
 const uploadState = ref<'idle' | 'uploading'>('idle')
 
+// Section header settings (gallery_section table)
+const sectionForm = reactive({
+  title: 'Our Facilities',
+  description: 'A look inside our production, quality control, and team.',
+  published: true,
+})
+const sectionSaved = ref(false)
+const sectionSaving = ref(false)
+
+async function loadSection() {
+  const { data } = await supabase.from('gallery_section').select('title, description, published').single()
+  if (data) {
+    sectionForm.title = data.title || sectionForm.title
+    sectionForm.description = data.description || sectionForm.description
+    sectionForm.published = data.published ?? true
+  }
+}
+
+async function saveSection() {
+  sectionSaving.value = true
+  await supabase.from('gallery_section').upsert({
+    id: 1,
+    title: sectionForm.title,
+    description: sectionForm.description,
+    published: sectionForm.published,
+  })
+  sectionSaving.value = false
+  sectionSaved.value = true
+  setTimeout(() => (sectionSaved.value = false), 2000)
+}
+
 const categoryOptions = ['production', 'factory', 'certifications', 'team']
 
 const emptyForm = () => ({
@@ -108,7 +139,10 @@ async function handleImageUpload(event: Event) {
   input.value = ''
 }
 
-onMounted(loadItems)
+onMounted(() => {
+  loadItems()
+  loadSection()
+})
 </script>
 
 <template>
@@ -124,6 +158,46 @@ onMounted(loadItems)
       >
         <span style="font-size: 18px; line-height: 1;">+</span> Add Item
       </button>
+    </div>
+
+    <!-- Section Settings -->
+    <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div>
+          <h2 style="font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 700; color: #1B3022; margin: 0;">Section Header</h2>
+          <p style="font-size: 12px; color: #737973; margin: 2px 0 0;">Title and description shown above the gallery on the website</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span v-if="sectionSaved" style="font-size: 13px; font-weight: 600; color: #2E7D32;">✓ Saved</span>
+          <button @click="saveSection" :disabled="sectionSaving"
+            style="padding: 10px 24px; border-radius: 10px; background: #1B3022; color: white; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s;"
+            :style="sectionSaving ? 'opacity: 0.6; cursor: not-allowed;' : ''"
+            @mouseenter="!sectionSaving && ($el.style.opacity='0.9')" @mouseleave="!sectionSaving && ($el.style.opacity='1')"
+          >{{ sectionSaving ? 'Saving...' : 'Save Section' }}</button>
+        </div>
+      </div>
+      <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Title</label>
+          <input v-model="sectionForm.title" placeholder="e.g. Our Facilities"
+            style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+          />
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; color: #434843; font-weight: 500; padding-bottom: 10px;">
+            <input v-model="sectionForm.published" type="checkbox"
+              style="width: 18px; height: 18px; accent-color: #1B3022; border-radius: 4px; cursor: pointer;"
+            />
+            Published
+          </label>
+        </div>
+      </div>
+      <div>
+        <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Description</label>
+        <textarea v-model="sectionForm.description" rows="2" placeholder="Short description under the title"
+          style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical;"
+        ></textarea>
+      </div>
     </div>
 
     <!-- Add/Edit Form -->

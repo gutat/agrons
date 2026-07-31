@@ -82,6 +82,21 @@ onMounted(async () => {
 
 const menuOpen = ref(false);
 
+// Company branding — fetched from company_info (admin-editable)
+const companyName = ref("Agro Nusa Sejahtera");
+const companyLogo = ref("/logo.png");
+
+onMounted(async () => {
+  const { data } = await supabase
+    .from("company_info")
+    .select("name, logo_url")
+    .single();
+  if (data) {
+    if (data.name) companyName.value = data.name;
+    if (data.logo_url) companyLogo.value = data.logo_url;
+  }
+});
+
 function handleMenuClose() {
     setTimeout(() => {
         menuOpen.value = false;
@@ -139,8 +154,8 @@ const inactiveDotStyle = computed(() => ({
                 class="flex items-center gap-3 no-underline select-none"
                 @click.prevent="onNavClick('home')"
             >
-                <img src="/logo.png" alt="Agro Nusa" class="h-8 w-auto" />
-                <span class="sm:inline text-sm md:text-base font-semibold  leading-none">Agro Nusa Sejahtera</span>
+                <img :src="companyLogo" alt="Agro Nusa" class="h-8 w-auto" />
+                <span class="sm:inline text-sm md:text-base font-semibold  leading-none">{{ companyName }}</span>
             </a>
 
             <div v-if="isDesktop" class="hidden md:flex items-center gap-2 self-stretch">

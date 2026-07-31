@@ -63,6 +63,25 @@ CREATE POLICY "Admin can manage gallery" ON gallery_items
   USING (true)
   WITH CHECK (true);
 
+-- 2b. GALLERY SECTION (single row -- section title/description)
+CREATE TABLE gallery_section (
+  id INT PRIMARY KEY DEFAULT 1,
+  title TEXT DEFAULT 'Our Facilities',
+  description TEXT,
+  published BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT single_row CHECK (id = 1)
+);
+ALTER TABLE gallery_section ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can view gallery section" ON gallery_section
+  FOR SELECT TO anon, authenticated
+  USING (published = true);
+CREATE POLICY "Admin can manage gallery section" ON gallery_section
+  FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
 -- 3. HOME SECTION (single row)
 CREATE TABLE home_section (
   id INT PRIMARY KEY DEFAULT 1,
@@ -175,6 +194,10 @@ CREATE TRIGGER set_products_updated_at
   BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER set_gallery_section_updated_at
+  BEFORE UPDATE ON gallery_section
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER set_home_section_updated_at
   BEFORE UPDATE ON home_section
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -268,6 +291,14 @@ INSERT INTO products (name, category, slug, short_description, thumbnail, video_
  '[{"type": "image", "url": "https://picsum.photos/seed/cocofiber-mat-2m/800/600"}]',
  '[{"name": "Width", "value": "2m"}, {"name": "Length", "value": "50m"}, {"name": "Material", "value": "100% Natural Cocofiber"}, {"name": "Biodegradable", "value": "100%"}]',
  '{"Slope protection", "Revegetation", "Landscaping", "Mining reclamation"}', 6);
+
+-- Gallery Section
+INSERT INTO gallery_section (id, title, description)
+VALUES (
+  1,
+  'Our Facilities',
+  'A look inside our production, quality control, and team.'
+);
 
 -- Gallery Items (using picsum.photos placeholder images)
 INSERT INTO gallery_items (category, title, description, image, thumbnail, type, sort_order) VALUES

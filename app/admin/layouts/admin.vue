@@ -27,6 +27,23 @@ const authError = ref('')
 const showUserMenu = ref(false)
 const mobileNavOpen = ref(false)
 
+// Company branding — fetched from company_info (admin-editable)
+const companyName = ref('Agro Nusa Sejahtera')
+const companyLogo = ref('')
+
+async function fetchCompany() {
+  const { data } = await supabase.from('company_info').select('name, logo_url').single()
+  if (data) {
+    if (data.name) companyName.value = data.name
+    if (data.logo_url) companyLogo.value = data.logo_url
+  }
+}
+
+onMounted(() => {
+  fetchCompany()
+  checkSession()
+})
+
 watch(mobileNavOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
@@ -52,8 +69,6 @@ async function signOut() {
   user.value = null
 }
 
-onMounted(checkSession)
-
 function navClass(path: string) {
   const active = props.section === path
   return active
@@ -69,10 +84,11 @@ function navClass(path: string) {
       <div style="width: 100%; max-width: 400px;">
         <div style="text-align: center; margin-bottom: 32px;">
           <div style="width: 48px; height: 48px; border-radius: 14px; background: #1B3022; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <img v-if="companyLogo" :src="companyLogo" alt="" style="width: 28px; height: 28px; object-fit: contain;" />
+            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <h1 style="font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 700; color: #1B3022; margin: 0;">Admin Login</h1>
-          <p style="font-size: 14px; color: #737973; margin-top: 4px;">PT Agro Nusa Sejahtera Sejahtera</p>
+          <p style="font-size: 14px; color: #737973; margin-top: 4px;">{{ companyName }}</p>
         </div>
         <form @submit.prevent="signIn" style="display: flex; flex-direction: column; gap: 16px;">
           <div>
@@ -108,10 +124,11 @@ function navClass(path: string) {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#181C1D" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
           <NuxtLink :to="`/${adminPath}/dashboard`" style="display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0;">
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <img v-if="companyLogo" :src="companyLogo" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
+              <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
-            <span class="adm-brand-text" style="font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 700; color: #1B3022; white-space: nowrap;">Agro Nusa Sejahtera</span>
+            <span class="adm-brand-text" style="font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 700; color: #1B3022; white-space: nowrap;">{{ companyName }}</span>
           </NuxtLink>
 
           <!-- Center: Nav Menu (desktop only; drawer on mobile) -->
@@ -159,10 +176,11 @@ function navClass(path: string) {
         <aside class="adm-drawer" :class="{ open: mobileNavOpen }">
           <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(24,28,29,0.06); flex-shrink: 0;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 34px; height: 34px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img v-if="companyLogo" :src="companyLogo" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
               </div>
-              <span style="font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; color: #1B3022; white-space: nowrap;">Agro Nusa Sejahtera</span>
+              <span style="font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; color: #1B3022; white-space: nowrap;">{{ companyName }}</span>
             </div>
             <button @click="mobileNavOpen = false" aria-label="Close menu" style="width: 34px; height: 34px; border-radius: 8px; border: none; background: rgba(24,28,29,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#434843" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>

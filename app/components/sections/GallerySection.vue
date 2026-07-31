@@ -11,6 +11,11 @@ const supabase = useSupabase()
 const items = ref<GalleryItem[]>([])
 const loading = ref(true)
 
+// Section header — fetched from gallery_section (admin-editable), with
+// the previous hardcoded values as fallback.
+const sectionTitle = ref('Our Facilities')
+const sectionDescription = ref('A look inside our production, quality control, and team.')
+
 const masonryItems = computed(() =>
   items.value.slice(0, 8).map((item, i) => ({
     id: item.id,
@@ -42,7 +47,14 @@ function nextImage() {
 }
 
 onMounted(async () => {
-  const { data } = await supabase.from('gallery_items').select('*').eq('published', true).order('sort_order')
+  const [{ data: section }, { data }] = await Promise.all([
+    supabase.from('gallery_section').select('title, description').eq('published', true).single(),
+    supabase.from('gallery_items').select('*').eq('published', true).order('sort_order'),
+  ])
+  if (section) {
+    if (section.title) sectionTitle.value = section.title
+    if (section.description) sectionDescription.value = section.description
+  }
   if (data) items.value = data
   loading.value = false
 })
@@ -72,7 +84,7 @@ onMounted(async () => {
       <!-- Section Title -->
       <div class="animate-entry delay-1 flex-shrink-0">
         <BlurText
-          text="Our Facilities"
+          :text="sectionTitle"
           className="headline-md mb-3"
           :delay="60"
           :step-duration="0.3"
@@ -80,7 +92,7 @@ onMounted(async () => {
           direction="bottom"
         />
         <BlurText
-          text="A look inside our production, quality control, and team."
+          :text="sectionDescription"
           className="body-md max-w-lg leading-relaxed"
           :delay="80"
           :step-duration="0.25"
