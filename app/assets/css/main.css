@@ -337,6 +337,10 @@ html::-webkit-scrollbar {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+  /* Never leave content hidden when animations are disabled */
+  .animate-entry {
+    opacity: 1 !important;
+  }
 }
 
 /* ===== Typography ===== */

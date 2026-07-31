@@ -111,7 +111,7 @@ async function save() {
 
       <!-- Social Media Links -->
       <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
-        <KeyValueEditor v-model="form.social" title="Social Media Links" key-placeholder="platform (e.g. linkedin)" value-placeholder="url (e.g. https://linkedin.com/company/...)" />
+        <KeyValueEditor v-model="form.social" title="Social Media Links" key-placeholder="platform (linkedin, instagram, facebook, youtube, twitter/x, whatsapp, tiktok, telegram)" value-placeholder="url (e.g. https://linkedin.com/company/...)" />
       </div>
 
       <!-- Save -->

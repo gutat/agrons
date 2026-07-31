@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Motion, useAnimationFrame, useMotionValue, useTransform } from 'motion-v';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 interface ShinyTextProps {
   text: string;
@@ -29,7 +29,10 @@ const props = withDefaults(defineProps<ShinyTextProps>(), {
   delay: 0
 });
 
+const el = ref<HTMLElement | null>(null);
 const isPaused = ref(false);
+const inView = ref(true);
+const reducedMotion = ref(false);
 const progress = useMotionValue(0);
 const elapsedRef = ref(0);
 const lastTimeRef = ref<number | null>(null);
@@ -38,8 +41,28 @@ const directionRef = ref(props.direction === 'left' ? 1 : -1);
 const animationDuration = computed(() => props.speed * 1000);
 const delayDuration = computed(() => props.delay * 1000);
 
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Pause the frame loop while the element is off-screen — the shine
+  // is invisible anyway, so the animation would just burn CPU.
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      inView.value = entry?.isIntersecting ?? true;
+    },
+    { rootMargin: '100px' }
+  );
+  observer.observe(el.value!);
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
+});
+
 useAnimationFrame(time => {
-  if (props.disabled || isPaused.value) {
+  if (props.disabled || isPaused.value || !inView.value || reducedMotion.value) {
     lastTimeRef.value = null;
     return;
   }
@@ -123,13 +146,15 @@ const gradientStyle = computed(() => ({
 </script>
 
 <template>
-  <Motion
-    tag="span"
-    :class="['inline-block', className]"
-    :style="{ ...gradientStyle, backgroundPosition }"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
-  >
-    {{ text }}
-  </Motion>
+  <span ref="el" class="inline-block">
+    <Motion
+      tag="span"
+      :class="['inline-block', className]"
+      :style="{ ...gradientStyle, backgroundPosition }"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+    >
+      {{ text }}
+    </Motion>
+  </span>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MotionProps } from 'motion-v';
-import { AnimatePresence, Motion } from 'motion-v';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { AnimatePresence, Motion, animate as animateMotionValue, motionValue, useTransform } from 'motion-v';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 export type StaggerFrom = 'first' | 'last' | 'center' | 'random' | number;
 export type SplitBy = 'characters' | 'words' | 'lines';
@@ -61,7 +61,90 @@ const props = withDefaults(defineProps<RotatingTextProps>(), {
 });
 
 const currentTextIndex = ref(0);
+const el = ref<HTMLElement | null>(null);
 let intervalId: ReturnType<typeof setInterval> | null = null;
+
+// --- Smooth width: the container animates between word widths so the
+//     preceding inline text (e.g. "Premium") glides instead of jumping. ---
+const containerWidth = motionValue<number>(0);
+const widthStyle = useTransform(containerWidth, (w) => (w > 0 ? `${w}px` : 'auto'));
+const measureRef = ref<HTMLSpanElement | null>(null);
+
+function getRootEl(): HTMLElement | null {
+  return ((el.value as any)?.$el || el.value) as HTMLElement | null;
+}
+
+function measureCurrentWidth(): number {
+  if (!measureRef.value) return 0;
+  const root = getRootEl();
+  let extra = 0;
+  if (root) {
+    const cs = getComputedStyle(root);
+    extra =
+      (parseFloat(cs.paddingLeft) || 0) +
+      (parseFloat(cs.paddingRight) || 0) +
+      (parseFloat(cs.borderLeftWidth) || 0) +
+      (parseFloat(cs.borderRightWidth) || 0);
+  }
+  return Math.ceil(measureRef.value.getBoundingClientRect().width + extra);
+}
+
+function animateWidthTo(nextWidth: number) {
+  if (!nextWidth) return;
+  animateMotionValue(containerWidth, nextWidth, {
+    type: 'spring',
+    stiffness: 110,
+    damping: 20,
+    mass: 0.9,
+  });
+}
+
+// Delay the width animation until the old word has mostly exited so the
+// badge never clips the outgoing characters.
+let widthTimer: ReturnType<typeof setTimeout> | null = null;
+watch(currentTextIndex, async () => {
+  await nextTick();
+  const w = measureCurrentWidth();
+  if (!w) return;
+  if (widthTimer) clearTimeout(widthTimer);
+  widthTimer = setTimeout(() => animateWidthTo(w), 260);
+});
+
+onMounted(async () => {
+  reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const target = getRootEl();
+  if (target) {
+    observer = new IntersectionObserver(
+      ([entry]) => {
+        inView.value = entry?.isIntersecting ?? false;
+        if (!inView.value) cleanupInterval();
+        else if (props.auto && !reducedMotion.value) startInterval();
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(target);
+  }
+  // Lock the container to the initial word width so later rotations
+  // animate px→px instead of snapping from auto.
+  await nextTick();
+  const w = measureCurrentWidth();
+  if (w) containerWidth.set(w);
+  startInterval();
+});
+
+onUnmounted(() => {
+  cleanupInterval();
+  observer?.disconnect();
+  if (widthTimer) clearTimeout(widthTimer);
+});
+
+// Only rotate while the headline is actually visible, and never for
+// users who prefer reduced motion (they see the first word, static).
+const inView = ref(false);
+const reducedMotion = ref(false);
+let observer: IntersectionObserver | null = null;
+
+
 
 const splitIntoCharacters = (text: string): string[] => {
   if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
@@ -183,7 +266,7 @@ const cleanupInterval = (): void => {
 };
 
 const startInterval = (): void => {
-  if (props.auto) {
+  if (props.auto && inView.value && !reducedMotion.value) {
     intervalId = setInterval(next, props.rotationInterval);
   }
 };
@@ -202,24 +285,22 @@ watch(
     startInterval();
   }
 );
-
-onMounted(() => {
-  startInterval();
-});
-
-onUnmounted(() => {
-  cleanupInterval();
-});
 </script>
 
 <template>
   <Motion
+    ref="el"
     tag="span"
-    :class="cn('flex flex-wrap whitespace-pre-wrap relative', mainClassName)"
+    :class="cn('flex-wrap whitespace-pre-wrap relative', mainClassName)"
+    :style="{ width: widthStyle }"
     v-bind="$attrs"
     :transition="transition"
-    layout
   >
+    <!-- Hidden probe: measures the exact width of the current word -->
+    <span ref="measureRef" aria-hidden="true" class="absolute invisible whitespace-nowrap pointer-events-none">
+      {{ texts[currentTextIndex] }}
+    </span>
+
     <span class="sr-only">
       {{ texts[currentTextIndex] }}
     </span>
@@ -230,7 +311,6 @@ onUnmounted(() => {
         tag="span"
         :class="cn(splitBy === 'lines' ? 'flex flex-col w-full' : 'flex flex-wrap whitespace-pre-wrap relative')"
         aria-hidden="true"
-        layout
       >
         <span v-for="(wordObj, wordIndex) in elements" :key="wordIndex" :class="cn('inline-flex', splitLevelClassName)">
           <Motion

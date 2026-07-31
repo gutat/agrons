@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createClient } from '@supabase/supabase-js'
+import FloatingWhatsApp from '~/components/common/FloatingWhatsApp.vue'
 import type { Product, GalleryItem } from '~/types'
 
 // ===== UI State =====
@@ -94,5 +95,6 @@ onMounted(() => {
   <div>
     <NuxtRouteAnnouncer />
     <NuxtPage />
+    <FloatingWhatsApp />
   </div>
 </template>

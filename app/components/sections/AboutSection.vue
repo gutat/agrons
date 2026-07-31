@@ -96,7 +96,7 @@ onUnmounted(() => {
         <div
             class="relative z-[2] max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full section-content h-full"
         >
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 mb-8">
                 <div class="mb-3">
                     <SplitText
                         text="02 &mdash; About"

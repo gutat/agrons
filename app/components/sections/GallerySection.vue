@@ -52,7 +52,7 @@ onMounted(async () => {
   <Section id="gallery" class="section-fixed">
     <div class="max-w-(--spacing-container) mx-auto px-(--spacing-gutter) w-full section-content h-full flex flex-col">
       <!-- Numbered Header -->
-      <div class="mb-3 flex-shrink-0">
+      <div class="mb-3 flex-shrink-0 mt-2">
         <SplitText
           text="04 &mdash; Gallery"
           className="section-number block"

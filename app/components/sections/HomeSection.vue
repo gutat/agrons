@@ -126,7 +126,7 @@ onMounted(async () => {
                 </div>
 
                 <div
-                    class="max-w-3xl mx-auto animate-entry delay-1 text-center md:text-left"
+                    class="max-w-3xl mx-auto animate-entry delay-1 text-center"
                 >
                     <ShinyText
                         :text="section.tagline"
@@ -141,7 +141,7 @@ onMounted(async () => {
                     <BlurText
                         v-if="section.description"
                         :text="section.description"
-                        className="!text-white/90 body-lg leading-relaxed max-w-xl mt-4"
+                        className="!text-white/90 body-lg leading-relaxed max-w-xl mx-auto mt-4"
                         :delay="100"
                         :step-duration="0.3"
                         animate-by="words"
@@ -149,12 +149,12 @@ onMounted(async () => {
                     />
 
                     <h1
-                        class="display-lg mt-4 md:mt-10 mb-2 md:mb-4 leading-[1.08] home-headline"
+                        class="display-lg mt-4 md:mt-10 mb-2 md:mb-4 leading-[1.08] home-headline flex justify-center items-center"
                     >
                         <SplitText
                             text="Premium"
                             tag="span"
-                            className="inline text-white tracking-wide opacity-80"
+                            className="inline text-white tracking-wide opacity-80 mr-2"
                             split-type="chars"
                             :delay="60"
                             :duration="0.4"
@@ -165,9 +165,6 @@ onMounted(async () => {
                             root-margin="-50px"
                             text-align="left"
                         />
-                        <span
-                            class="inline-block min-w-[140px] md:min-w-[280px] text-left relative"
-                        >
                             <RotatingText
                                 :texts="[
                                     'Cocopeat',
@@ -186,28 +183,26 @@ onMounted(async () => {
                                 :initial="{ y: '80%', opacity: 0 }"
                                 :animate="{ y: 0, opacity: 1 }"
                                 :exit="{ y: '-80%', opacity: 0 }"
-                                main-class-name="inline-flex"
+                                main-class-name="inline-flex items-center justify-center rounded-full border border-[var(--color-husk-light)]/40 bg-[var(--color-husk-light)]/10 px-4 md:px-5 py-1 md:py-1.5"
                                 element-level-class-name="text-[var(--color-husk-light)]"
                             />
-                        </span>
-                        <br /><SplitText
-                            text="from Indonesia"
-                            tag="span"
-                            className="inline text-white tracking-wide"
-                            split-type="chars"
-                            :delay="60"
-                            :duration="0.4"
-                            ease="power3.out"
-                            :from="{ opacity: 0, y: 20 }"
-                            :to="{ opacity: 1, y: 0 }"
-                            :threshold="0.3"
-                            root-margin="-50px"
-                            text-align="left"
-                        />
                     </h1>
-
+                    <SplitText
+                        text="from Indonesia"
+                        tag="span"
+                        className="inline text-white tracking-wide"
+                        split-type="chars"
+                        :delay="60"
+                        :duration="0.4"
+                        ease="power3.out"
+                        :from="{ opacity: 0, y: 20 }"
+                        :to="{ opacity: 1, y: 0 }"
+                        :threshold="0.3"
+                        root-margin="-50px"
+                        text-align="left"
+                    />
                     <div
-                        class="flex flex-wrap items-center gap-4 mt-6 md:mt-16"
+                        class="flex flex-wrap items-center justify-center gap-4 mt-6 md:mt-16"
                     >
                         <StarBorder
                             as="a"

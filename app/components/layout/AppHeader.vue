@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { useWindowScroll } from "@vueuse/core";
+import { useWindowScroll, useMediaQuery } from "@vueuse/core";
 import ThemeSwitcher from "~/components/layout/ThemeSwitcher.vue";
 import Button from "~/components/common/Button.vue";
 import StaggeredMenu from "~/components/bits/StaggeredMenu.vue";
 import GooeyNav from "~/components/bits/GooeyNav.vue";
+
+// Mount nav components only for the viewport that uses them — GooeyNav's
+// ResizeObserver + effect positioning and StaggeredMenu's GSAP timeline
+// don't need to exist on screens where they're never visible.
+const isDesktop = useMediaQuery("(min-width: 768px)");
 
 const { y: scrollY } = useWindowScroll();
 const supabase = useSupabase();
@@ -138,7 +143,7 @@ const inactiveDotStyle = computed(() => ({
                 <span class="sm:inline text-sm md:text-base font-semibold  leading-none">Agro Nusa Sejahtera</span>
             </a>
 
-            <div class="hidden md:flex items-center gap-2 self-stretch">
+            <div v-if="isDesktop" class="hidden md:flex items-center gap-2 self-stretch">
                 <GooeyNav
                     :items="[
                         { label: 'Home', href: '#home' },
@@ -161,8 +166,8 @@ const inactiveDotStyle = computed(() => ({
                 </div> -->
             </div>
 
-            <!-- Mobile: StaggeredMenu -->
-            <div class="md:hidden flex items-center">
+            <!-- Mobile: StaggeredMenu (mounted only on small screens) -->
+            <div v-if="!isDesktop" class="md:hidden flex items-center">
                 <StaggeredMenu
                     position="right"
                     :items="menuItems"

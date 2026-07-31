@@ -36,6 +36,12 @@ const focusRect = ref({ x: 0, y: 0, width: 0, height: 0 });
 
 let interval: ReturnType<typeof setInterval> | null = null;
 
+// Don't burn CPU flipping words while the section is off-screen, and
+// never for users who prefer reduced motion (first word stays).
+const inView = ref(false);
+const reducedMotion = ref(false);
+let observer: IntersectionObserver | null = null;
+
 watch(
   [currentIndex, () => words.value.length],
   async () => {
@@ -84,7 +90,7 @@ const setWordRef = (el: HTMLSpanElement | null, index: number) => {
 
 const startInterval = () => {
   if (interval) clearInterval(interval);
-  if (!props.manualMode) {
+  if (!props.manualMode && inView.value && !reducedMotion.value) {
     interval = setInterval(
       () => {
         currentIndex.value = (currentIndex.value + 1) % words.value.length;
@@ -96,6 +102,16 @@ const startInterval = () => {
 
 onMounted(async () => {
   await nextTick();
+
+  reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      inView.value = entry?.isIntersecting ?? false;
+      startInterval();
+    },
+    { threshold: 0.2 }
+  );
+  if (containerRef.value) observer.observe(containerRef.value);
 
   const isOwner = props.syncGroup ? registerSyncGroup(props.syncGroup) : true;
 
@@ -127,6 +143,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (interval) clearInterval(interval);
+  observer?.disconnect();
   if (props.syncGroup) unregisterSyncGroup(props.syncGroup);
 });
 </script>

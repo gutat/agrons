@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { register } from "swiper/element/bundle";
+import { register } from "swiper/element";
 import gsap from "gsap";
 import type { ProductMedia } from "~/types";
 register();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { register } from "swiper/element/bundle";
+import { register } from "swiper/element";
 import { useSupabase } from "~/utils/supabase";
 import type { Product, ProductMedia } from "~/types";
 import Section from "~/components/common/Section.vue";
@@ -24,9 +24,17 @@ const filteredProducts = computed(() =>
 
 const { supportsVideo } = useMediaSupport();
 const activeIndex = ref(0);
+const swiperRef = ref<any>(null);
 
 function onSlideChange(e: Event) {
     activeIndex.value = (e.target as any)?.activeIndex ?? 0;
+}
+
+function prevSlide() {
+    swiperRef.value?.swiper?.slidePrev()
+}
+function nextSlide() {
+    swiperRef.value?.swiper?.slideNext()
 }
 
 watch(activeCategory, () => {
@@ -146,7 +154,7 @@ onMounted(async () => {
                 >
                 <swiper-container
                     v-if="filteredProducts.length > 0"
-                    navigation="true"
+                    ref="swiperRef"
                     slides-per-view="1"
                     speed="500"
                     grab-cursor
@@ -280,6 +288,24 @@ onMounted(async () => {
                     </swiper-slide>
                 </swiper-container>
 
+                <!-- Custom prev/next arrows (core swiper has no built-in nav) -->
+                <button
+                    v-if="filteredProducts.length > 1 && activeIndex > 0"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-[var(--color-parchment-raised)]/85 dark:bg-[var(--color-charcoal-raised)]/85 backdrop-blur-md shadow-md flex items-center justify-center text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:scale-105 transition-all"
+                    @click="prevSlide"
+                    aria-label="Previous product"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <button
+                    v-if="filteredProducts.length > 1 && activeIndex < filteredProducts.length - 1"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-[var(--color-parchment-raised)]/85 dark:bg-[var(--color-charcoal-raised)]/85 backdrop-blur-md shadow-md flex items-center justify-center text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:scale-105 transition-all"
+                    @click="nextSlide"
+                    aria-label="Next product"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+
                 <!-- Empty state -->
                 <div
                     v-else
@@ -302,45 +328,3 @@ onMounted(async () => {
 </template>
 
 <style scoped></style>
-
-<style>
-.product-swiper {
-    --swiper-navigation-size: 40px;
-    --swiper-navigation-color: var(--color-forest);
-    --swiper-navigation-sides-offset: 8px;
-}
-.product-swiper swiper-container::part(button-prev),
-.product-swiper swiper-container::part(button-next) {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: color-mix(
-        in oklch,
-        var(--color-parchment-raised) 85%,
-        transparent
-    );
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
-    transition: all 0.2s ease;
-}
-.dark .product-swiper swiper-container::part(button-prev),
-.dark .product-swiper swiper-container::part(button-next) {
-    background: color-mix(
-        in oklch,
-        var(--color-charcoal-raised) 85%,
-        transparent
-    );
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-.product-swiper swiper-container::part(button-prev):hover,
-.product-swiper swiper-container::part(button-next):hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-.product-swiper swiper-container::part(button-prev) {
-    left: 12px;
-}
-.product-swiper swiper-container::part(button-next) {
-    right: 12px;
-}
-</style>
