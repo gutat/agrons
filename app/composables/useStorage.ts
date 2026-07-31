@@ -14,7 +14,9 @@
 export function useStorage() {
   const config = useRuntimeConfig()
   const supabase = useSupabase()
-  const apiBase = () => `${config.public.appUrl || ''}/api`
+  // Trim appUrl: a trailing space in the env secret would otherwise produce
+  // URLs like "https://agrosentra.com /api/..." which fail DNS resolution.
+  const apiBase = () => `${(config.public.appUrl || '').trim()}/api`
 
   async function uploadFile(file: File, path: string): Promise<string | null> {
     // ① fetch the upload API key (RLS-protected — requires a logged-in admin)
