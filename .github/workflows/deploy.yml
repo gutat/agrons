@@ -34,6 +34,18 @@ jobs:
           exclude: |
             **/uploads/**
 
+      # Write the PHP API config with real keys (never committed to git).
+      # Uses quoted heredoc so the shell doesn't touch the PHP $vars.
+      - name: Write PHP API config
+        run: |
+          cat > api/config.php <<'EOF'
+          <?php
+          return [
+              'uploadApiKey' => '${{ secrets.UPLOAD_API_KEY }}',
+              'signingKey' => '${{ secrets.UPLOAD_SIGNING_KEY }}',
+          ];
+          EOF
+
       - name: Deploy PHP API
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:

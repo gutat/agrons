@@ -25,3 +25,6 @@ logs
 
 # Credentials
 docs/plans/CREDENTIALS.md
+
+# PHP API keys (generated at deploy time from GitHub secrets)
+api/config.php

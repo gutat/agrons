@@ -1,0 +1,5 @@
+# Deny direct web access to the config file (contains API keys).
+# The PHP scripts load it via require(), which is unaffected by this rule.
+<Files "config.php">
+  Require all denied
+</Files>

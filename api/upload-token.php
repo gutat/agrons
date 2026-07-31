@@ -16,8 +16,12 @@
 declare(strict_types=1);
 
 // --- Config -------------------------------------------------------------
-$uploadApiKey  = getenv('UPLOAD_API_KEY');    // same key as admin_settings row
-$signingKey    = getenv('UPLOAD_SIGNING_KEY'); // custom HMAC key (openssl rand -hex 32)
+// Keys come from api/config.php (written at deploy time from GitHub
+// secrets); env vars are kept as a fallback for local development.
+$configFile = __DIR__ . '/config.php';
+$config     = is_file($configFile) ? (require $configFile) : [];
+$uploadApiKey  = getenv('UPLOAD_API_KEY') ?: ($config['uploadApiKey'] ?? '');
+$signingKey    = getenv('UPLOAD_SIGNING_KEY') ?: ($config['signingKey'] ?? '');
 $tokenTtl      = 600;                           // 10 minutes
 $rateLimit     = 5;                             // max tokens per hour per IP
 // ------------------------------------------------------------------------

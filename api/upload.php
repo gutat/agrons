@@ -17,7 +17,10 @@
 declare(strict_types=1);
 
 // --- Config -------------------------------------------------------------
-$signingKey  = getenv('UPLOAD_SIGNING_KEY'); // same key as upload-token.php
+// Same config source as upload-token.php (api/config.php + env fallback).
+$configFile = __DIR__ . '/config.php';
+$config     = is_file($configFile) ? (require $configFile) : [];
+$signingKey  = getenv('UPLOAD_SIGNING_KEY') ?: ($config['signingKey'] ?? '');
 $uploadDir   = __DIR__ . '/../uploads';
 $maxBytes    = 20 * 1024 * 1024;             // 20 MB
 $allowedExt  = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm'];
