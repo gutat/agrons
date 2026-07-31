@@ -51,7 +51,19 @@ export default defineNuxtConfig({
   nitro: {
     preset: "static",
     prerender: {
-      routes: ["/"],
+      routes: [
+        "/",
+        // Admin entry points: generate real files so /<adminPath> works
+        // on plain static hosting (no SPA-fallback rewrites needed).
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/dashboard`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/products`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/gallery`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/home`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/about`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/company`,
+        `/${process.env.NUXT_PUBLIC_ADMIN_PATH || "admin"}/messages`,
+      ],
     },
   },
 });

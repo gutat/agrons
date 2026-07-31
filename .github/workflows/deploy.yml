@@ -33,7 +33,6 @@ jobs:
           server-dir: /public_html/
           exclude: |
             **/uploads/**
-            **/.htaccess
 
       - name: Deploy PHP API
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

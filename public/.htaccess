@@ -1,0 +1,10 @@
+# SPA fallback for the Nuxt static build.
+# Existing files/dirs (e.g. /uploads/) are served as-is;
+# everything else falls back to the app shell (200.html).
+
+RewriteEngine On
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /200.html [L]
