@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from "~/utils/supabase";
 import Section from "~/components/common/Section.vue";
-import Button from "~/components/common/Button.vue";
 import RotatingText from "~/components/bits/RotatingText.vue";
 import BlurText from "~/components/bits/BlurText.vue";
 import SplitText from "~/components/bits/SplitText.vue";
@@ -44,7 +43,11 @@ onMounted(async () => {
         )
         .eq("published", true)
         .single();
-    if (data) section.value = { ...section.value, ...data };
+  if (data) section.value = { ...section.value, ...data };
+  console.log("Data section:", section.value);
+  console.log("hero_video_url:", section.value.hero_video_url);
+  console.log("supportsVideo:", supportsVideo.value); // Perhatikan .value karena ini ref
+  console.log("readyToPlay:", readyToPlay.value);
 });
 </script>
 
@@ -234,13 +237,6 @@ onMounted(async () => {
                                 </svg>
                             </span>
                         </StarBorder>
-                        <Button
-                            variant="outline"
-                            size="md"
-                            href="#contact"
-                            class="!py-[18px]"
-                            >Contact Us</Button
-                        >
                     </div>
                 </div>
             </div>
