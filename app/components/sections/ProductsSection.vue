@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { register } from "swiper/element";
 import { useSupabase } from "~/utils/supabase";
+import { useContent } from "~/composables/useContent";
 import type { Product, ProductMedia } from "~/types";
 import Section from "~/components/common/Section.vue";
 import Button from "~/components/common/Button.vue";
@@ -10,6 +11,7 @@ import ProductGalleryOverlay from "~/components/products/ProductGalleryOverlay.v
 register();
 
 const supabase = useSupabase();
+const { contentText, pick, contentList } = useContent();
 
 const products = ref<Product[]>([]);
 const activeCategory = ref<"cocopeat" | "cocofiber">("cocopeat");
@@ -22,6 +24,21 @@ const filteredProducts = computed(() =>
     products.value.filter((p) => p.category === activeCategory.value),
 );
 
+// Products with localized fields resolved (falls back to legacy columns)
+const resolvedProducts = computed(() =>
+    filteredProducts.value.map((p: any) => ({
+        ...p,
+        name: contentText(p, "name"),
+        short_description: contentText(p, "short_description"),
+        specifications: (p.specifications || []).map((s: any) => ({
+            name: pick(s.name),
+            value: pick(s.value),
+            unit: typeof s.unit === "string" ? s.unit : "",
+        })),
+        applications: contentList(p.applications),
+    })),
+);
+
 const { supportsVideo } = useMediaSupport();
 const activeIndex = ref(0);
 const swiperRef = ref<any>(null);
@@ -31,10 +48,10 @@ function onSlideChange(e: Event) {
 }
 
 function prevSlide() {
-    swiperRef.value?.swiper?.slidePrev()
+    swiperRef.value?.swiper?.slidePrev();
 }
 function nextSlide() {
-    swiperRef.value?.swiper?.slideNext()
+    swiperRef.value?.swiper?.slideNext();
 }
 
 watch(activeCategory, () => {
@@ -90,7 +107,7 @@ onMounted(async () => {
                 <!-- Section Title -->
                 <div class="animate-entry delay-1">
                     <BlurText
-                        text="Premium Coconut Products"
+                        :text="$t('products.title')"
                         className="headline-md mb-3"
                         :delay="60"
                         :step-duration="0.3"
@@ -98,7 +115,7 @@ onMounted(async () => {
                         direction="bottom"
                     />
                     <BlurText
-                        text="High-quality cocopeat and cocofiber for greenhouses, horticulture, and industrial applications."
+                        :text="$t('products.subtitle')"
                         className="body-md max-w-lg leading-relaxed"
                         :delay="80"
                         :step-duration="0.25"
@@ -116,9 +133,6 @@ onMounted(async () => {
                         :key="cat"
                         :class="[
                             'relative text-sm md:text-base font-medium transition-all capitalize pb-1',
-                            activeCategory === cat
-                                ? 'text-white dark:text-black'
-                                : 'text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)] hover:text-[var(--color-forest)] dark:hover:text-[var(--color-forest-light)]',
                         ]"
                         @click="
                             activeCategory = cat as 'cocopeat' | 'cocofiber'
@@ -152,167 +166,201 @@ onMounted(async () => {
                 <div
                     class="h-full w-full md:max-w-(--spacing-container) md:mx-auto md:px-(--spacing-gutter)"
                 >
-                <swiper-container
-                    v-if="filteredProducts.length > 0"
-                    ref="swiperRef"
-                    slides-per-view="1"
-                    speed="500"
-                    grab-cursor
-                    @slidechange="onSlideChange"
-                    class="h-full w-full product-swiper"
-                >
-                    <swiper-slide
-                        v-for="(product, index) in filteredProducts"
-                        :key="product.id"
-                        class="h-full"
+                    <swiper-container
+                        v-if="resolvedProducts.length > 0"
+                        ref="swiperRef"
+                        slides-per-view="1"
+                        speed="500"
+                        grab-cursor
+                        @slidechange="onSlideChange"
+                        class="h-full w-full product-swiper"
                     >
-                        <div
-                            class="grid grid-cols-2 h-full w-full overflow-hidden rounded-t-[12px]"
+                        <swiper-slide
+                            v-for="(product, index) in resolvedProducts"
+                            :key="product.id"
+                            class="h-full"
                         >
-                            <!-- Left: Specifications -->
                             <div
-                                class="flex flex-col justify-center px-4 md:px-12 py-4 md:py-10 overflow-y-auto"
+                                class="grid grid-cols-2 h-full w-full overflow-hidden rounded-t-[12px]"
                             >
-                                <span
-                                    class="label-caps text-[var(--color-husk)] dark:text-[var(--color-husk-light)] mb-2"
-                                    >{{ product.category }}</span
-                                >
-                                <h3
-                                    class="text-xl md:text-2xl font-semibold mb-3"
-                                >
-                                    {{ product.name }}
-                                </h3>
-                                <p
-                                    class="text-sm md:text-base leading-relaxed mb-3"
-                                >
-                                    {{ product.short_description }}
-                                </p>
-
-                                <!-- Specifications -->
+                                <!-- Left: Specifications -->
                                 <div
-                                    v-if="product.specifications?.length"
-                                    class="space-y-1.5 mb-4"
-                                >
-                                    <div
-                                        v-for="spec in product.specifications"
-                                        :key="spec.name"
-                                        class="flex justify-between text-sm border-b border-[var(--color-ink)]/15 dark:border-white/15 py-1.5"
-                                    >
-                                        <span
-                                            class="font-medium"
-                                            >{{ spec.name }}</span
-                                        >
-                                        <span
-                                            class="font-semibold "
-                                            >{{ spec.value
-                                            }}{{
-                                                spec.unit ? " " + spec.unit : ""
-                                            }}</span
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Applications -->
-                                <div
-                                    v-if="product.applications?.length"
-                                    class="flex flex-wrap gap-1.5 mb-4"
+                                    class="flex flex-col justify-center px-4 md:px-12 py-4 md:py-10 overflow-y-auto"
                                 >
                                     <span
-                                        v-for="app in product.applications"
-                                        :key="app"
-                                        class="px-3 py-1.5 bg-[var(--color-forest)]/12 dark:bg-white/12 rounded-lg text-sm font-semibold"
-                                        >{{ app }}</span
+                                        class="label-caps text-[var(--color-husk)] dark:text-[var(--color-husk-light)] mb-2"
+                                        >{{ product.category }}</span
                                     >
+                                    <h3
+                                        class="text-xl md:text-2xl font-semibold mb-3"
+                                    >
+                                        {{ product.name }}
+                                    </h3>
+                                    <p
+                                        class="text-sm md:text-base leading-relaxed mb-3"
+                                    >
+                                        {{ product.short_description }}
+                                    </p>
+
+                                    <!-- Specifications -->
+                                    <div
+                                        v-if="product.specifications?.length"
+                                        class="space-y-1.5 mb-4"
+                                    >
+                                        <div
+                                            v-for="spec in product.specifications"
+                                            :key="spec.name"
+                                            class="flex justify-between text-sm border-b border-[var(--color-ink)]/15 dark:border-white/15 py-1.5"
+                                        >
+                                            <span class="font-medium">{{
+                                                spec.name
+                                            }}</span>
+                                            <span class="font-semibold"
+                                                >{{ spec.value
+                                                }}{{
+                                                    spec.unit
+                                                        ? " " + spec.unit
+                                                        : ""
+                                                }}</span
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- Applications -->
+                                    <div
+                                        v-if="product.applications?.length"
+                                        class="flex flex-wrap gap-1.5 mb-4"
+                                    >
+                                        <span
+                                            v-for="app in product.applications"
+                                            :key="app"
+                                            class="px-3 py-1.5 bg-[var(--color-forest)]/12 dark:bg-white/12 rounded-lg text-sm font-semibold"
+                                            >{{ app }}</span
+                                        >
+                                    </div>
+
+                                    <button
+                                        class="text-sm md:text-base font-bold hover:underline transition-all self-start"
+                                        @click.prevent="openGallery(product)"
+                                    >
+                                        {{ $t("products.viewGallery") }} &rarr;
+                                    </button>
                                 </div>
 
-                                <button
-                                    class="text-sm md:text-base font-bold  hover:underline transition-all self-start"
-                                    @click.prevent="openGallery(product)"
-                                >
-                                    View Gallery &rarr;
-                                </button>
-                            </div>
-
-                            <!-- Right: Product Photo / Video -->
-                            <div
-                                class="relative h-full overflow-hidden bg-[var(--color-parchment-dim)] dark:bg-[var(--color-charcoal-raised-higher)]"
-                            >
-                                <video
-                                    v-if="supportsVideo && index === activeIndex && product.video_url"
-                                    autoplay
-                                    preload="none"
-                                    muted
-                                    loop
-                                    playsinline
-                                    :poster="product.thumbnail || undefined"
-                                    class="absolute inset-0 w-full h-full object-cover"
-                                >
-                                    <source
-                                        :src="product.video_url"
-                                        type="video/mp4"
-                                    />
-                                </video>
-                                <img
-                                    v-else-if="product.thumbnail"
-                                    :src="product.thumbnail"
-                                    :alt="product.name"
-                                    class="absolute inset-0 w-full h-full object-cover"
-                                    loading="lazy"
-                                />
+                                <!-- Right: Product Photo / Video -->
                                 <div
-                                    v-else
-                                    class="absolute inset-0 flex items-center justify-center"
+                                    class="relative h-full overflow-hidden bg-[var(--color-parchment-dim)] dark:bg-[var(--color-charcoal-raised-higher)]"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="48"
-                                        height="48"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1"
-                                        class="stroke-[var(--color-ink-faint)] dark:stroke-[var(--color-charcoal-ink-faint)]"
+                                    <video
+                                        v-if="
+                                            supportsVideo &&
+                                            index === activeIndex &&
+                                            product.video_url
+                                        "
+                                        autoplay
+                                        preload="none"
+                                        muted
+                                        loop
+                                        playsinline
+                                        :poster="product.thumbnail || undefined"
+                                        class="absolute inset-0 w-full h-full object-cover"
                                     >
-                                        <rect
-                                            x="3"
-                                            y="3"
-                                            width="18"
-                                            height="18"
-                                            rx="2"
+                                        <source
+                                            :src="product.video_url"
+                                            type="video/mp4"
                                         />
-                                        <circle cx="8.5" cy="8.5" r="1.5" />
-                                        <path d="M21 15l-5-5L5 21" />
-                                    </svg>
+                                    </video>
+                                    <img
+                                        v-else-if="product.thumbnail"
+                                        :src="product.thumbnail"
+                                        :alt="product.name"
+                                        class="absolute inset-0 w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                    <div
+                                        v-else
+                                        class="absolute inset-0 flex items-center justify-center"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="48"
+                                            height="48"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1"
+                                            class="stroke-[var(--color-ink-faint)] dark:stroke-[var(--color-charcoal-ink-faint)]"
+                                        >
+                                            <rect
+                                                x="3"
+                                                y="3"
+                                                width="18"
+                                                height="18"
+                                                rx="2"
+                                            />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <path d="M21 15l-5-5L5 21" />
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </swiper-slide>
-                </swiper-container>
+                        </swiper-slide>
+                    </swiper-container>
 
-                <!-- Custom prev/next arrows (core swiper has no built-in nav) -->
-                <button
-                    v-if="filteredProducts.length > 1 && activeIndex > 0"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-[var(--color-parchment-raised)]/85 dark:bg-[var(--color-charcoal-raised)]/85 backdrop-blur-md shadow-md flex items-center justify-center text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:scale-105 transition-all"
-                    @click="prevSlide"
-                    aria-label="Previous product"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <button
-                    v-if="filteredProducts.length > 1 && activeIndex < filteredProducts.length - 1"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-[var(--color-parchment-raised)]/85 dark:bg-[var(--color-charcoal-raised)]/85 backdrop-blur-md shadow-md flex items-center justify-center text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:scale-105 transition-all"
-                    @click="nextSlide"
-                    aria-label="Next product"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </button>
+                    <!-- Custom prev/next arrows (core swiper has no built-in nav) -->
+                    <button
+                        v-if="resolvedProducts.length > 1 && activeIndex > 0"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-[var(--color-parchment-raised)]/85 dark:bg-[var(--color-charcoal-raised)]/85 backdrop-blur-md shadow-md flex items-center justify-center text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:scale-105 transition-all"
+                        @click="prevSlide"
+                        aria-label="Previous product"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15 19l-7-7 7-7"
+                            />
+                        </svg>
+                    </button>
+                    <button
+                        v-if="
+                            resolvedProducts.length > 1 &&
+                            activeIndex < resolvedProducts.length - 1
+                        "
+                        class="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-[var(--color-parchment-raised)]/85 dark:bg-[var(--color-charcoal-raised)]/85 backdrop-blur-md shadow-md flex items-center justify-center text-[var(--color-forest)] dark:text-[var(--color-forest-light)] hover:scale-105 transition-all"
+                        @click="nextSlide"
+                        aria-label="Next product"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+                    </button>
 
-                <!-- Empty state -->
-                <div
-                    v-else
-                    class="flex items-center justify-center h-full text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)]"
-                >
-                    <p>No products in this category yet.</p>
-                </div>
+                    <div
+                        v-else
+                        class="flex items-center justify-center h-full text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)]"
+                    >
+                        <p>{{ $t("products.empty") }}</p>
+                    </div>
                 </div>
             </div>
         </div>

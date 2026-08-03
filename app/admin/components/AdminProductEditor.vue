@@ -4,6 +4,7 @@ import type { Product, ProductMedia } from '~/types'
 import { useStorage } from '~/composables/useStorage'
 import SpecsEditor from '~/admin/components/editors/SpecsEditor.vue'
 import TagsEditor from '~/admin/components/editors/TagsEditor.vue'
+import TranslatedField from '~/admin/components/editors/TranslatedField.vue'
 
 const supabase = useSupabase()
 const { uploadFile, deleteFile } = useStorage()
@@ -22,10 +23,11 @@ const form = reactive({
   origin: 'Indonesia',
   thumbnail: '',
   video_url: '',
-  specifications: [] as { name: string; value: string; unit?: string }[],
-  applications: [] as string[],
+  specifications: [] as { name: any; value: any; unit?: string }[],
+  applications: [] as any[],
   published: true,
   media: [] as ProductMedia[],
+  translations: {} as Record<string, any>,
 })
 const loading = ref(!isNew)
 const saving = ref(false)
@@ -35,8 +37,11 @@ const mediaType = ref<'image' | 'video'>('image')
 const newMediaUrl = ref('')
 
 async function loadProduct() {
-  const { data } = await supabase.from('products').select('*').eq('id', props.id).single()
-  if (data) {
+  try {
+    const { data, error } = await supabase.from('products').select('*').eq('id', props.id).maybeSingle()
+    if (error) {
+      console.error('product load failed:', error)
+    } else if (data) {
     form.name = data.name
     form.category = data.category
     form.slug = data.slug
@@ -51,8 +56,13 @@ async function loadProduct() {
     form.applications = data.applications || []
     form.published = data.published
     form.media = data.media || []
+    form.translations = data.translations || {}
+    }
+  } catch (e) {
+    console.error('product load failed:', e)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 function generateSlug(name: string) {
@@ -119,6 +129,7 @@ async function save() {
     applications: apps,
     published: form.published,
     media: form.media,
+    translations: form.translations,
   }
   if (isNew) {
     await supabase.from('products').insert([record])
@@ -150,16 +161,11 @@ onMounted(() => { if (!isNew) loadProduct() })
       <div style="width: 28px; height: 28px; border: 2px solid #1B3022; border-top-color: transparent; border-radius: 50%; animation: adminSpin 0.6s linear infinite; margin: 0 auto;"></div>
     </div>
 
-    <form v-else @submit.prevent="save" style="max-width: 720px; display: flex; flex-direction: column; gap: 20px;">
+    <form v-else @submit.prevent="save" style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
       <!-- Name + Category -->
       <div class="adm-grid" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Name *</label>
-          <input v-model="form.name" required
-            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"
-            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-          />
+          <TranslatedField v-model:en="form.name" v-model:translations="form.translations" field="name" label="Name *" placeholder="e.g. Cocopeat Block 5kg" />
         </div>
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Category *</label>
@@ -195,23 +201,14 @@ onMounted(() => { if (!isNew) loadProduct() })
       </div>
 
       <!-- Short Description -->
+      <!-- Short Description -->
       <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Short Description</label>
-        <textarea v-model="form.short_description" rows="2"
-          style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical; transition: border-color 0.2s;"
-          @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-          @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-        ></textarea>
+        <TranslatedField v-model:en="form.short_description" v-model:translations="form.translations" field="short_description" label="Short Description" textarea :rows="2" placeholder="Short marketing blurb" />
       </div>
 
       <!-- Full Description -->
       <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Description</label>
-        <textarea v-model="form.description" rows="4"
-          style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical; transition: border-color 0.2s;"
-          @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-          @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-        ></textarea>
+        <TranslatedField v-model:en="form.description" v-model:translations="form.translations" field="description" label="Description" textarea :rows="4" placeholder="Full description" />
       </div>
 
       <!-- Thumbnail + Video -->
@@ -310,22 +307,13 @@ onMounted(() => { if (!isNew) loadProduct() })
       </div>
 
       <!-- MOQ + Lead Time -->
+      <!-- MOQ + Lead Time -->
       <div class="adm-grid" style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">MOQ</label>
-          <input v-model="form.moq" placeholder="e.g. 100 kg"
-            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"
-            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-          />
+          <TranslatedField v-model:en="form.moq" v-model:translations="form.translations" field="moq" label="MOQ" placeholder="e.g. 100 kg" />
         </div>
         <div>
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Lead Time</label>
-          <input v-model="form.lead_time" placeholder="e.g. 7-14 days"
-            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"
-            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-          />
+          <TranslatedField v-model:en="form.lead_time" v-model:translations="form.translations" field="lead_time" label="Lead Time" placeholder="e.g. 7-14 days" />
         </div>
       </div>
 

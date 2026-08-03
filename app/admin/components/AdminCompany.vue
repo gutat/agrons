@@ -20,14 +20,21 @@ const saving = ref(false)
 const saved = ref(false)
 
 onMounted(async () => {
-  const { data } = await supabase.from('company_info').select('*').single()
-  if (data) {
-    form.name = data.name || ''
-    form.logo_url = data.logo_url || ''
-    form.contact = { address: '', phone: '', email: '', whatsapp: '', ...(data.contact || {}) }
-    form.social = data.social || {}
+  try {
+    const { data, error } = await supabase.from('company_info').select('*').maybeSingle()
+    if (error) {
+      console.error('company_info load failed:', error)
+    } else if (data) {
+      form.name = data.name || ''
+      form.logo_url = data.logo_url || ''
+      form.contact = { address: '', phone: '', email: '', whatsapp: '', ...(data.contact || {}) }
+      form.social = data.social || {}
+    }
+  } catch (e) {
+    console.error('company_info load failed:', e)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 })
 
 async function save() {
@@ -57,7 +64,7 @@ async function save() {
       <div style="width: 28px; height: 28px; border: 2px solid #1B3022; border-top-color: transparent; border-radius: 50%; animation: adminSpin 0.6s linear infinite; margin: 0 auto;"></div>
     </div>
 
-    <form v-else @submit.prevent="save" style="max-width: 720px; display: flex; flex-direction: column; gap: 20px;">
+    <form v-else @submit.prevent="save" style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
       <!-- Name + Logo -->
       <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">

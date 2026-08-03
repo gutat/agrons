@@ -10,21 +10,25 @@ const visible = ref(false)
 // Entrance animation: fade in slightly after load so it doesn't jump in
 onMounted(async () => {
   // Prefer the number saved in company_info (same source as the contact section)
-  const { data } = await supabase
-    .from('company_info')
-    .select('contact')
-    .single()
-
-  const raw = (data?.contact as any)?.whatsapp
-    || config.public.whatsappNumber
-    || ''
-
-  const digits = String(raw).replace(/[^0-9]/g, '')
-  if (!digits) return
-
-  const message = encodeURIComponent(config.public.whatsappMessage || '')
-  whatsappLink.value = `https://wa.me/${digits}${message ? `?text=${message}` : ''}`
-  visible.value = true
+  try {
+    const { data, error } = await supabase
+      .from('company_info')
+      .select('contact')
+      .maybeSingle()
+    if (error) {
+      console.error('company_info load failed:', error)
+    }
+    const raw = (data?.contact as any)?.whatsapp
+      || config.public.whatsappNumber
+      || ''
+    const digits = String(raw).replace(/[^0-9]/g, '')
+    if (!digits) return
+    const message = encodeURIComponent(config.public.whatsappMessage || '')
+    whatsappLink.value = `https://wa.me/${digits}${message ? `?text=${message}` : ''}`
+    visible.value = true
+  } catch (e) {
+    console.error('company_info load failed:', e)
+  }
 })
 </script>
 
@@ -44,7 +48,7 @@ onMounted(async () => {
         <path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84Z" />
       </svg>
       <!-- Hover tooltip (desktop only) -->
-      <span class="absolute right-full mr-3 whitespace-nowrap rounded-lg bg-[#181C1D] text-white text-xs font-semibold px-3 py-1.5 opacity-0 translate-x-1 pointer-events-none transition-all group-hover:opacity-100 group-hover:translate-x-0 hidden md:block" aria-hidden="true">Chat on WhatsApp</span>
+      <span class="absolute right-full mr-3 whitespace-nowrap rounded-lg bg-[#181C1D] text-white text-xs font-semibold px-3 py-1.5 opacity-0 translate-x-1 pointer-events-none transition-all group-hover:opacity-100 group-hover:translate-x-0 hidden md:block" aria-hidden="true">{{ $t('contact.chatOnWhatsApp') }}</span>
     </a>
   </Transition>
 </template>

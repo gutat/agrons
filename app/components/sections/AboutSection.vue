@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from "~/utils/supabase";
+import { useContent } from "~/composables/useContent";
 import Section from "~/components/common/Section.vue";
 import TrueFocus from "~/components/bits/TrueFocus.vue";
 import BlurText from "~/components/bits/BlurText.vue";
@@ -8,6 +9,7 @@ import SplitText from "~/components/bits/SplitText.vue";
 import ValueIcon from "~/components/bits/ValueIcon.vue";
 
 const supabase = useSupabase();
+const { contentText, pick } = useContent();
 
 const focusIndex = ref(0);
 let focusTimer: ReturnType<typeof setInterval> | null = null;
@@ -25,6 +27,15 @@ const loading = ref(true);
 const hasMediaBg = computed(() => !!(section.value.hero_image_url || section.value.hero_video_url));
 const { supportsVideo } = useMediaSupport();
 const videoInView = ref(false);
+
+// Values with localized title/description (plain strings pass through)
+const resolvedValues = computed(() =>
+    (section.value.values || []).map((v: any) => ({
+        icon: v.icon || '',
+        title: pick(v.title),
+        description: pick(v.description),
+    })),
+);
 
 onMounted(() => {
     const el = document.getElementById("about");
@@ -45,13 +56,20 @@ onMounted(() => {
 });
 
 onMounted(async () => {
-    const { data } = await supabase
-        .from("about_section")
-        .select("title, mission, vision, values, hero_image_url, hero_video_url")
-        .eq("published", true)
-        .single();
-    if (data) section.value = { ...section.value, ...data };
-    loading.value = false;
+    try {
+        const { data, error } = await supabase
+            .from("about_section")
+            .select("title, mission, vision, values, hero_image_url, hero_video_url, translations")
+            .eq("published", true)
+            .maybeSingle();
+        if (error) {
+            console.error("about_section load failed:", error);
+        } else if (data) {
+            section.value = { ...section.value, ...data };
+        }
+    } finally {
+        loading.value = false;
+    }
 });
 
 onMounted(() => {
@@ -99,7 +117,7 @@ onUnmounted(() => {
             <div class="flex-shrink-0 mb-8">
                 <div class="mb-3">
                     <SplitText
-                        text="02 &mdash; About"
+                        :text="$t('sections.about')"
                         className="section-number block"
                         :delay="80"
                         :duration="0.5"
@@ -116,7 +134,7 @@ onUnmounted(() => {
 
                 <div class="animate-entry delay-1">
                     <BlurText
-                        :text="section.title"
+                        :text="contentText(section, 'title')"
                         className="label-caps !text-[var(--color-husk)] dark:!text-white"
                         :delay="60"
                         :step-duration="0.3"
@@ -131,7 +149,7 @@ onUnmounted(() => {
                 class="animate-entry delay-2 flex-1 flex flex-col justify-center"
             >
                 <TrueFocus
-                    sentence="Mission Vision"
+                    :sentence="$t('about.missionVision')"
                     :manual-mode="false"
                     :blur-amount="5"
                     border-color="#B4CDB8"
@@ -145,7 +163,7 @@ onUnmounted(() => {
                     <BlurText
                         v-if="focusIndex === 0"
                         key="mission"
-                        :text="section.mission"
+                        :text="contentText(section, 'mission')"
                         className="text-[15px] text-[var(--color-ink)] dark:text-[var(--color-charcoal-ink)] leading-relaxed"
                         :delay="60"
                         :step-duration="0.25"
@@ -155,7 +173,7 @@ onUnmounted(() => {
                     <BlurText
                         v-else
                         key="vision"
-                        :text="section.vision"
+                        :text="contentText(section, 'vision')"
                         className="text-[15px] text-[var(--color-ink)] dark:text-[var(--color-charcoal-ink)] leading-relaxed"
                         :delay="60"
                         :step-duration="0.25"
@@ -165,11 +183,11 @@ onUnmounted(() => {
                 </div>
 
                 <div
-                    v-if="section.values?.length"
+                    v-if="resolvedValues.length"
                     class="mt-8 md:mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5"
                 >
                     <div
-                        v-for="v in section.values"
+                        v-for="v in resolvedValues"
                         :key="v.title"
                         class="flex flex-col gap-1"
                     >

@@ -24,9 +24,16 @@ const company = ref({
 const loading = ref(true);
 
 onMounted(async () => {
-    const { data } = await supabase.from("company_info").select("*").single();
-    if (data) company.value = data;
-    loading.value = false;
+    try {
+        const { data, error } = await supabase.from("company_info").select("*").maybeSingle();
+        if (error) {
+            console.error("company_info load failed:", error);
+        } else if (data) {
+            company.value = data;
+        }
+    } finally {
+        loading.value = false;
+    }
 });
 
 onMounted(() => {

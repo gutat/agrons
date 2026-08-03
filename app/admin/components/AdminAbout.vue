@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from '~/utils/supabase'
+import TranslatedField from '~/admin/components/editors/TranslatedField.vue'
 import ValuesCardsEditor from '~/admin/components/editors/ValuesCardsEditor.vue'
 
 const supabase = useSupabase()
@@ -8,27 +9,36 @@ const form = reactive({
   title: '',
   mission: '',
   vision: '',
-  values: [] as { icon: string; title: string; description: string }[],
+  values: [] as { icon: string; title: any; description: any }[],
   hero_video_url: '',
   hero_image_url: '',
   published: true,
+  translations: {} as Record<string, any>,
 })
 const loading = ref(true)
 const saving = ref(false)
 const saved = ref(false)
 
 onMounted(async () => {
-  const { data } = await supabase.from('about_section').select('*').single()
-  if (data) {
-    form.title = data.title || ''
-    form.mission = data.mission || ''
-    form.vision = data.vision || ''
-    form.values = data.values || []
-    form.hero_video_url = data.hero_video_url || ''
-    form.hero_image_url = data.hero_image_url || ''
-    form.published = data.published ?? true
+  try {
+    const { data, error } = await supabase.from('about_section').select('*').maybeSingle()
+    if (error) {
+      console.error('about_section load failed:', error)
+    } else if (data) {
+      form.title = data.title || ''
+      form.mission = data.mission || ''
+      form.vision = data.vision || ''
+      form.values = data.values || []
+      form.hero_video_url = data.hero_video_url || ''
+      form.hero_image_url = data.hero_image_url || ''
+      form.published = data.published ?? true
+      form.translations = data.translations || {}
+    }
+  } catch (e) {
+    console.error('about_section load failed:', e)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 })
 
 async function save() {
@@ -42,6 +52,7 @@ async function save() {
     hero_video_url: form.hero_video_url || null,
     hero_image_url: form.hero_image_url || null,
     published: form.published,
+    translations: form.translations,
   }).eq('id', 1)
   saving.value = false
   saved.value = true
@@ -60,34 +71,19 @@ async function save() {
       <div style="width: 28px; height: 28px; border: 2px solid #1B3022; border-top-color: transparent; border-radius: 50%; animation: adminSpin 0.6s linear infinite; margin: 0 auto;"></div>
     </div>
 
-    <form v-else @submit.prevent="save" style="max-width: 720px; display: flex; flex-direction: column; gap: 20px;">
+    <form v-else @submit.prevent="save" style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
       <!-- Title -->
       <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
-        <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Section Title</label>
-        <input v-model="form.title" required
-          style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"
-          @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-          @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-        />
+        <TranslatedField v-model:en="form.title" v-model:translations="form.translations" field="title" label="Section Title" />
       </div>
 
       <!-- Mission + Vision -->
       <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Mission</label>
-          <textarea v-model="form.mission" rows="3"
-            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical; transition: border-color 0.2s;"
-            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-          ></textarea>
+          <TranslatedField v-model:en="form.mission" v-model:translations="form.translations" field="mission" label="Mission" textarea :rows="3" />
         </div>
         <div style="background: white; border-radius: 16px; border: 1px solid rgba(24,28,29,0.08); padding: 24px;">
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #434843; margin-bottom: 6px;">Vision</label>
-          <textarea v-model="form.vision" rows="3"
-            style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 15px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical; transition: border-color 0.2s;"
-            @focus="$el.style.borderColor='#1B3022'; $el.style.boxShadow='0 0 0 3px rgba(27,48,34,0.1)'"
-            @blur="$el.style.borderColor='rgba(24,28,29,0.1)'; $el.style.boxShadow='none'"
-          ></textarea>
+          <TranslatedField v-model:en="form.vision" v-model:translations="form.translations" field="vision" label="Vision" textarea :rows="3" />
         </div>
       </div>
 

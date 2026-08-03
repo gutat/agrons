@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSupabase } from '~/utils/supabase'
+import { useContent } from '~/composables/useContent'
 import type { GalleryItem } from '~/types'
 import Section from '~/components/common/Section.vue'
 import Masonry from '~/components/bits/Masonry.vue'
@@ -7,20 +8,24 @@ import BlurText from '~/components/bits/BlurText.vue'
 import SplitText from '~/components/bits/SplitText.vue'
 
 const supabase = useSupabase()
+const { contentText } = useContent()
 
 const items = ref<GalleryItem[]>([])
 const loading = ref(true)
 
-// Section header — fetched from gallery_section (admin-editable), with
-// the previous hardcoded values as fallback.
-const sectionTitle = ref('Our Facilities')
-const sectionDescription = ref('A look inside our production, quality control, and team.')
+// Section header row (gallery_section) + fallback text
+const sectionRow = ref<any>(null)
+const sectionTitle = computed(() => contentText(sectionRow.value, 'title') || 'Our Facilities')
+const sectionDescription = computed(() => contentText(sectionRow.value, 'description') || 'A look inside our production, quality control, and team.')
 
 const masonryItems = computed(() =>
   items.value.slice(0, 8).map((item, i) => ({
     id: item.id,
     img: item.image,
     url: '',
+    text: contentText(item, 'title'),
+    description: contentText(item, 'description'),
+    alt: contentText(item, 'alt'),
     height: [350, 250, 400, 280, 320][i % 5],
   }))
 )
@@ -47,16 +52,19 @@ function nextImage() {
 }
 
 onMounted(async () => {
-  const [{ data: section }, { data }] = await Promise.all([
-    supabase.from('gallery_section').select('title, description').eq('published', true).single(),
-    supabase.from('gallery_items').select('*').eq('published', true).order('sort_order'),
-  ])
-  if (section) {
-    if (section.title) sectionTitle.value = section.title
-    if (section.description) sectionDescription.value = section.description
+  try {
+    const [{ data: section, error: sectionError }, { data }] = await Promise.all([
+      supabase.from('gallery_section').select('title, description, translations').eq('published', true).maybeSingle(),
+      supabase.from('gallery_items').select('*').eq('published', true).order('sort_order'),
+    ])
+    if (sectionError) console.error('gallery_section load failed:', sectionError)
+    if (section) sectionRow.value = section
+    if (data) items.value = data
+  } catch (e) {
+    console.error('gallery load failed:', e)
+  } finally {
+    loading.value = false
   }
-  if (data) items.value = data
-  loading.value = false
 })
 </script>
 
@@ -66,7 +74,7 @@ onMounted(async () => {
       <!-- Numbered Header -->
       <div class="mb-3 flex-shrink-0 mt-2">
         <SplitText
-          text="04 &mdash; Gallery"
+          :text="$t('sections.gallery')"
           className="section-number block"
           :delay="80"
           :duration="0.5"
@@ -126,7 +134,7 @@ onMounted(async () => {
       <div v-else class="flex-1 flex items-center justify-center text-[var(--color-ink-muted)] dark:text-[var(--color-charcoal-ink-muted)] animate-entry delay-3">
         <div class="text-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke-width="1" class="mx-auto mb-3 opacity-30 stroke-current"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <p>No images in this category yet.</p>
+          <p>{{ $t('gallery.empty') }}</p>
         </div>
       </div>
     </div>
@@ -146,7 +154,7 @@ onMounted(async () => {
           </button>
 
           <div class="max-w-5xl w-full mx-6 text-center">
-            <img :key="galleryIndex" :src="masonryItems[galleryIndex].img" :alt="masonryItems[galleryIndex].text" class="w-full max-h-[70vh] object-contain rounded-xl" />
+            <img :key="galleryIndex" :src="masonryItems[galleryIndex].img" :alt="masonryItems[galleryIndex].alt" class="w-full max-h-[70vh] object-contain rounded-xl" />
             <div class="mt-5">
               <p class="text-white text-lg font-semibold">{{ masonryItems[galleryIndex].text }}</p>
               <p v-if="masonryItems[galleryIndex].description" class="text-white/70 text-sm mt-1.5">{{ masonryItems[galleryIndex].description }}</p>

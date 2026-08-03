@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { useWindowScroll, useMediaQuery } from "@vueuse/core";
+import { useI18n } from "vue-i18n";
 import ThemeSwitcher from "~/components/layout/ThemeSwitcher.vue";
 import Button from "~/components/common/Button.vue";
 import StaggeredMenu from "~/components/bits/StaggeredMenu.vue";
 import GooeyNav from "~/components/bits/GooeyNav.vue";
+import LangSwitcher from "~/components/common/LangSwitcher.vue";
+
+const { t } = useI18n({ useScope: "global" });
 
 // Mount nav components only for the viewport that uses them — GooeyNav's
 // ResizeObserver + effect positioning and StaggeredMenu's GSAP timeline
@@ -31,13 +35,8 @@ setupEntryAnimations();
 
 const menuItems = computed(() =>
     sectionIds.map((id) => ({
-        label:
-            id === "home"
-                ? "Home"
-                : id === "about"
-                  ? "About"
-                  : id.charAt(0).toUpperCase() + id.slice(1),
-        ariaLabel: `Go to ${id} section`,
+        label: t(`nav.${id}`),
+        ariaLabel: t(`nav.${id}`),
         link: `#${id}`,
     })),
 );
@@ -48,11 +47,14 @@ const socialItems = ref<{ label: string; link: string }[]>([
 ]);
 
 onMounted(async () => {
-    const { data } = await supabase
-        .from("company_info")
-        .select("contact, social")
-        .single();
-    if (data) {
+    try {
+        const { data, error } = await supabase
+            .from("company_info")
+            .select("contact, social")
+            .maybeSingle();
+        if (error) {
+            console.error("company_info load failed:", error);
+        } else if (data) {
         const items: { label: string; link: string }[] = [];
         if (data.contact?.whatsapp) {
             const num = String(data.contact.whatsapp).replace(/[^0-9]/g, "");
@@ -77,6 +79,9 @@ onMounted(async () => {
             }
         }
         if (items.length > 0) socialItems.value = items;
+        }
+    } catch (e) {
+        console.error("company_info load failed:", e);
     }
 });
 
@@ -87,14 +92,20 @@ const companyName = ref("Agro Nusa Sejahtera");
 const companyLogo = ref("/logo.png");
 
 onMounted(async () => {
-  const { data } = await supabase
-    .from("company_info")
-    .select("name, logo_url")
-    .single();
-  if (data) {
-    if (data.name) companyName.value = data.name;
-    if (data.logo_url) companyLogo.value = data.logo_url;
-  }
+    try {
+        const { data, error } = await supabase
+            .from("company_info")
+            .select("name, logo_url")
+            .maybeSingle();
+        if (error) {
+            console.error("company_info load failed:", error);
+        } else if (data) {
+            if (data.name) companyName.value = data.name;
+            if (data.logo_url) companyLogo.value = data.logo_url;
+        }
+    } catch (e) {
+        console.error("company_info load failed:", e);
+    }
 });
 
 function handleMenuClose() {
@@ -161,11 +172,11 @@ const inactiveDotStyle = computed(() => ({
             <div v-if="isDesktop" class="hidden md:flex items-center gap-2 self-stretch">
                 <GooeyNav
                     :items="[
-                        { label: 'Home', href: '#home' },
-                        { label: 'About', href: '#about' },
-                        { label: 'Products', href: '#products' },
-                        { label: 'Gallery', href: '#gallery' },
-                        { label: 'Contact', href: '#contact' },
+                        { label: t('nav.home'), href: '#home' },
+                        { label: t('nav.about'), href: '#about' },
+                        { label: t('nav.products'), href: '#products' },
+                        { label: t('nav.gallery'), href: '#gallery' },
+                        { label: t('nav.contact'), href: '#contact' },
                     ]"
                     :particle-count="10"
                     :particle-distances="[80, 10]"
@@ -181,8 +192,14 @@ const inactiveDotStyle = computed(() => ({
                 </div> -->
             </div>
 
-            <!-- Mobile: StaggeredMenu (mounted only on small screens) -->
-            <div v-if="!isDesktop" class="md:hidden flex items-center">
+            <!-- Desktop: language switcher (right side) -->
+            <div v-if="isDesktop" class="hidden md:flex items-center">
+                <LangSwitcher />
+            </div>
+
+            <!-- Mobile: language switcher + StaggeredMenu (mounted only on small screens) -->
+            <div v-if="!isDesktop" class="md:hidden flex items-center gap-2">
+                <LangSwitcher class="mr-16" />
                 <StaggeredMenu
                     position="right"
                     :items="menuItems"

@@ -57,21 +57,27 @@ const socialItems = computed(() =>
 );
 
 onMounted(async () => {
-    const { data } = await supabase
-        .from("company_info")
-        .select("contact, social")
-        .single();
-    if (data) {
-        if (data.contact) {
-            const raw = data.contact as any;
-            contact.value = {
-                address: raw.address || defaults.address,
-                email: raw.email || defaults.email,
-                whatsapp: raw.whatsapp || defaults.whatsapp,
-                whatsappLink: `https://wa.me/${(raw.whatsapp || defaults.whatsapp).replace(/[^0-9]/g, "")}`,
-            };
+    try {
+        const { data, error } = await supabase
+            .from("company_info")
+            .select("contact, social")
+            .maybeSingle();
+        if (error) {
+            console.error("company_info load failed:", error);
+        } else if (data) {
+            if (data.contact) {
+                const raw = data.contact as any;
+                contact.value = {
+                    address: raw.address || defaults.address,
+                    email: raw.email || defaults.email,
+                    whatsapp: raw.whatsapp || defaults.whatsapp,
+                    whatsappLink: `https://wa.me/${(raw.whatsapp || defaults.whatsapp).replace(/[^0-9]/g, "")}`,
+                };
+            }
+            if (data.social) social.value = data.social as Record<string, string>;
         }
-        if (data.social) social.value = data.social as Record<string, string>;
+    } catch (e) {
+        console.error("company_info load failed:", e);
     }
     loaded.value = true;
 });
@@ -85,7 +91,7 @@ onMounted(async () => {
             <!-- Numbered Header -->
             <div class="mb-3 flex-shrink-0">
                 <SplitText
-                    text="05 &mdash; Contact"
+                    :text="$t('sections.contact')"
                     className="section-number block"
                     :delay="80"
                     :duration="0.5"
@@ -103,7 +109,7 @@ onMounted(async () => {
             <!-- Section Title -->
             <div class="animate-entry delay-1 flex-shrink-0 w-full max-w-lg">
                 <BlurText
-                    text="Get in Touch"
+                    :text="$t('contact.getInTouch')"
                     className="headline-md mb-3"
                     :delay="60"
                     :step-duration="0.3"
@@ -111,7 +117,7 @@ onMounted(async () => {
                     direction="bottom"
                 />
                 <BlurText
-                    text="Reach out for inquiries, sample requests, or partnership opportunities."
+                    :text="$t('contact.subtitle')"
                     className="body-md max-w-lg leading-relaxed"
                     :delay="80"
                     :step-duration="0.25"
@@ -145,9 +151,9 @@ onMounted(async () => {
                             </div>
                             <div>
                                 <p
-                                    class="label-caps "
+                                    class="label-caps dark:!text-[var(--color-husk-light)]"
                                 >
-                                    Address
+                                    {{ $t('contact.address') }}
                                 </p>
                                 <p
                                     class="text-sm mt-0.5 leading-relaxed"
@@ -225,7 +231,7 @@ onMounted(async () => {
                     <div v-if="socialItems.length" class="mt-5 pt-4 border-t border-[var(--color-ink)]/8 dark:border-white/10">
                         <p
                             class="label-caps dark:!text-[var(--color-husk-light)] mb-3"
-                        >Follow Us</p>
+                        >{{ $t('contact.followUs') }}</p>
                         <div class="flex items-center gap-3">
                             <a
                                 v-for="item in socialItems"
@@ -261,7 +267,7 @@ onMounted(async () => {
                                     d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84Z"
                                 />
                             </svg>
-                            Chat on WhatsApp
+                            {{ $t('contact.chatOnWhatsApp') }}
                         </Button>
                     </div>
                 </div>

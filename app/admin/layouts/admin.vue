@@ -32,10 +32,16 @@ const companyName = ref('Agro Nusa Sejahtera')
 const companyLogo = ref('')
 
 async function fetchCompany() {
-  const { data } = await supabase.from('company_info').select('name, logo_url').single()
-  if (data) {
-    if (data.name) companyName.value = data.name
-    if (data.logo_url) companyLogo.value = data.logo_url
+  try {
+    const { data, error } = await supabase.from('company_info').select('name, logo_url').maybeSingle()
+    if (error) {
+      console.error('company_info load failed:', error)
+    } else if (data) {
+      if (data.name) companyName.value = data.name
+      if (data.logo_url) companyLogo.value = data.logo_url
+    }
+  } catch (e) {
+    console.error('company_info load failed:', e)
   }
 }
 
@@ -124,9 +130,9 @@ function navClass(path: string) {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#181C1D" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
           <NuxtLink :to="`/${adminPath}/dashboard`" style="display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0;">
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-              <img v-if="companyLogo" :src="companyLogo" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
-              <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <img v-if="companyLogo" :src="companyLogo" alt="" style="height: 36px; width: auto; max-width: 120px; object-fit: contain;" />
+            <div v-else style="width: 36px; height: 36px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
             <span class="adm-brand-text" style="font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 700; color: #1B3022; white-space: nowrap;">{{ companyName }}</span>
           </NuxtLink>
@@ -176,9 +182,9 @@ function navClass(path: string) {
         <aside class="adm-drawer" :class="{ open: mobileNavOpen }">
           <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(24,28,29,0.06); flex-shrink: 0;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 34px; height: 34px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                <img v-if="companyLogo" :src="companyLogo" alt="" style="width: 100%; height: 100%; object-fit: contain;" />
-                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <img v-if="companyLogo" :src="companyLogo" alt="" style="height: 34px; width: auto; max-width: 110px; object-fit: contain;" />
+              <div v-else style="width: 34px; height: 34px; border-radius: 10px; background: #1B3022; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
               </div>
               <span style="font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; color: #1B3022; white-space: nowrap;">{{ companyName }}</span>
             </div>

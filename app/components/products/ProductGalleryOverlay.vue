@@ -137,7 +137,7 @@ function handleKeydown(e: KeyboardEvent) {
         >
           <div>
             <span class="text-base md:text-lg font-medium text-white/50">{{ currentIndex + 1 }} / {{ items.length }}</span>
-            <h3 v-if="title" class="text-lg md:text-xl font-semibold text-white mt-0.5">{{ title }} Gallery</h3>
+            <h3 v-if="title" class="text-lg md:text-xl font-semibold text-white mt-0.5">{{ title }} {{ $t('products.gallerySuffix') }}</h3>
           </div>
           <button
             class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all mt-1 flex-shrink-0"

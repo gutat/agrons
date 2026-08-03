@@ -1,9 +1,11 @@
 <script setup lang="ts">
-// Table editor for specifications: [{ name, value, unit? }, ...]
-const model = defineModel<{ name: string; value: string; unit?: string }[]>({ default: [] })
+// Table editor for specifications: [{ name: {en,id}, value: {en,id}, unit? }, ...]
+import LangInput from '~/admin/components/editors/LangInput.vue'
+
+const model = defineModel<{ name: any; value: any; unit?: string }[]>({ default: [] })
 
 function addRow() {
-  model.value.push({ name: '', value: '', unit: '' })
+  model.value.push({ name: { en: '', id: '' }, value: { en: '', id: '' }, unit: '' })
 }
 
 function removeRow(index: number) {
@@ -33,17 +35,16 @@ function moveRow(from: number, to: number) {
 
     <div v-else style="display: flex; flex-direction: column; gap: 8px;">
       <div v-for="(row, index) in model" :key="index"
+        class="adm-spec-row"
         style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #F7FAFB; border-radius: 10px; border: 1px solid rgba(24,28,29,0.06);"
       >
-        <input v-model="row.name" placeholder="Name (e.g. EC)"
-          style="flex: 1.2; min-width: 0; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(24,28,29,0.1); background: white; font-size: 13px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
-        />
-        <input v-model="row.value" placeholder="Value (e.g. &lt; 0.5)"
-          style="flex: 1; min-width: 0; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(24,28,29,0.1); background: white; font-size: 13px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
-        />
-        <input v-model="row.unit" placeholder="Unit (e.g. mS/cm)"
-          style="flex: 0.8; min-width: 0; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(24,28,29,0.1); background: white; font-size: 13px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
-        />
+        <div class="adm-spec-grid" style="display: grid; grid-template-columns: 1.4fr 1.4fr 0.8fr; gap: 8px; flex: 1; min-width: 0;">
+          <LangInput v-model="row.name" en-placeholder="Name (e.g. EC)" id-placeholder="Nama (cth. EC)" />
+          <LangInput v-model="row.value" en-placeholder="Value (e.g. < 0.5)" id-placeholder="Nilai (cth. < 0.5)" />
+          <input v-model="row.unit" placeholder="Unit"
+            style="width: 100%; min-width: 0; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(24,28,29,0.1); background: white; font-size: 13px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
+          />
+        </div>
         <div style="display: flex; gap: 4px; flex-shrink: 0;">
           <button type="button" @click="moveRow(index, index - 1)" :disabled="index === 0"
             style="padding: 6px 8px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 13px; transition: background 0.15s;"

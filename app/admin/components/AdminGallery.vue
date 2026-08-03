@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSupabase } from '~/utils/supabase'
 import { useStorage } from '~/composables/useStorage'
+import TranslatedField from '~/admin/components/editors/TranslatedField.vue'
 
 const supabase = useSupabase()
 const { uploadFile } = useStorage()
@@ -17,16 +18,24 @@ const sectionForm = reactive({
   title: 'Our Facilities',
   description: 'A look inside our production, quality control, and team.',
   published: true,
+  translations: {} as Record<string, any>,
 })
 const sectionSaved = ref(false)
 const sectionSaving = ref(false)
 
 async function loadSection() {
-  const { data } = await supabase.from('gallery_section').select('title, description, published').single()
-  if (data) {
-    sectionForm.title = data.title || sectionForm.title
-    sectionForm.description = data.description || sectionForm.description
-    sectionForm.published = data.published ?? true
+  try {
+    const { data, error } = await supabase.from('gallery_section').select('title, description, published, translations').maybeSingle()
+    if (error) {
+      console.error('gallery_section load failed:', error)
+    } else if (data) {
+      sectionForm.title = data.title || sectionForm.title
+      sectionForm.description = data.description || sectionForm.description
+      sectionForm.published = data.published ?? true
+      sectionForm.translations = data.translations || {}
+    }
+  } catch (e) {
+    console.error('gallery_section load failed:', e)
   }
 }
 
@@ -37,6 +46,7 @@ async function saveSection() {
     title: sectionForm.title,
     description: sectionForm.description,
     published: sectionForm.published,
+    translations: sectionForm.translations,
   })
   sectionSaving.value = false
   sectionSaved.value = true
@@ -55,6 +65,7 @@ const emptyForm = () => ({
   type: 'image' as 'image' | 'video',
   sort_order: items.value.length + 1,
   published: true,
+  translations: {} as Record<string, any>,
 })
 
 const form = reactive(emptyForm())
@@ -84,6 +95,7 @@ function openEdit(item: any) {
     type: item.type || 'image',
     sort_order: item.sort_order ?? items.value.length + 1,
     published: item.published ?? true,
+    translations: item.translations || {},
   })
   showForm.value = true
 }
@@ -106,6 +118,7 @@ async function save() {
     type: form.type,
     sort_order: form.sort_order,
     published: form.published,
+    translations: form.translations,
   }
   if (editingId.value) {
     await supabase.from('gallery_items').update(record).eq('id', editingId.value)
@@ -178,10 +191,7 @@ onMounted(() => {
       </div>
       <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
         <div>
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Title</label>
-          <input v-model="sectionForm.title" placeholder="e.g. Our Facilities"
-            style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
-          />
+          <TranslatedField v-model:en="sectionForm.title" v-model:translations="sectionForm.translations" field="title" label="Title" placeholder="e.g. Our Facilities" />
         </div>
         <div style="display: flex; align-items: flex-end;">
           <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; color: #434843; font-weight: 500; padding-bottom: 10px;">
@@ -193,10 +203,7 @@ onMounted(() => {
         </div>
       </div>
       <div>
-        <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Description</label>
-        <textarea v-model="sectionForm.description" rows="2" placeholder="Short description under the title"
-          style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical;"
-        ></textarea>
+        <TranslatedField v-model:en="sectionForm.description" v-model:translations="sectionForm.translations" field="description" label="Description" textarea :rows="2" placeholder="Short description under the title" />
       </div>
     </div>
 
@@ -212,10 +219,7 @@ onMounted(() => {
 
       <div class="adm-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
         <div>
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Title *</label>
-          <input v-model="form.title" required placeholder="e.g. Cocopeat Block Production"
-            style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
-          />
+          <TranslatedField v-model:en="form.title" v-model:translations="form.translations" field="title" label="Title *" placeholder="e.g. Cocopeat Block Production" />
         </div>
         <div>
           <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Category</label>
@@ -244,18 +248,12 @@ onMounted(() => {
           />
         </div>
         <div>
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Alt Text</label>
-          <input v-model="form.alt" placeholder="Accessibility text"
-            style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit;"
-          />
+          <TranslatedField v-model:en="form.alt" v-model:translations="form.translations" field="alt" label="Alt Text" placeholder="Accessibility text" />
         </div>
       </div>
 
       <div style="margin-bottom: 14px;">
-        <label style="display: block; font-size: 12px; font-weight: 600; color: #737973; margin-bottom: 5px;">Description</label>
-        <textarea v-model="form.description" rows="2" placeholder="Short description"
-          style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(24,28,29,0.1); background: #F7FAFB; font-size: 14px; color: #181C1D; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical;"
-        ></textarea>
+        <TranslatedField v-model:en="form.description" v-model:translations="form.translations" field="description" label="Description" textarea :rows="2" placeholder="Short description" />
       </div>
 
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">

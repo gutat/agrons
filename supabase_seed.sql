@@ -28,6 +28,7 @@ CREATE TABLE products (
   origin TEXT DEFAULT 'Indonesia',
   sort_order INT DEFAULT 0,
   published BOOLEAN DEFAULT true,
+  translations JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -52,6 +53,7 @@ CREATE TABLE gallery_items (
   type TEXT DEFAULT 'image' CHECK (type IN ('image', 'video')),
   sort_order INT DEFAULT 0,
   published BOOLEAN DEFAULT true,
+  translations JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE gallery_items ENABLE ROW LEVEL SECURITY;
@@ -69,6 +71,7 @@ CREATE TABLE gallery_section (
   title TEXT DEFAULT 'Our Facilities',
   description TEXT,
   published BOOLEAN DEFAULT true,
+  translations JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT single_row CHECK (id = 1)
@@ -92,6 +95,7 @@ CREATE TABLE home_section (
   hero_video_url TEXT,
   hero_image_url TEXT,
   published BOOLEAN DEFAULT true,
+  translations JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT single_row CHECK (id = 1)
@@ -115,6 +119,7 @@ CREATE TABLE about_section (
   hero_video_url TEXT,
   hero_image_url TEXT,
   published BOOLEAN DEFAULT true,
+  translations JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT single_row CHECK (id = 1)
@@ -215,25 +220,27 @@ CREATE TRIGGER set_company_info_updated_at
 -- ============================================
 
 -- Home Section
-INSERT INTO home_section (id, company_name, tagline, description, subtitle, hero_image_url)
+INSERT INTO home_section (id, company_name, tagline, description, subtitle, hero_image_url, translations)
 VALUES (
   1,
   'PT Agro Nusa Sejahtera',
   'The Largest Coconut Derivatives Producers in Indonesia',
   'As a trusted supplier of premium coconut derivatives, we deliver consistent quality, sustainable sourcing, and scalable production for global buyers. Our product range includes cocopeat, coco fiber, coconut shell charcoal, desiccated coconut, and more -- crafted to meet international standards.',
   'Premium coconut derivatives: cocopeat, cocofiber, coconut charcoal, desiccated coconut, and more -- crafted to meet international standards.',
-  'https://picsum.photos/seed/home-hero/1600/900'
+  'https://picsum.photos/seed/home-hero/1600/900',
+  '{"tagline": {"id": "Produsen Turunan Kelapa Terbesar di Indonesia"}, "description": {"id": "Sebagai pemasok tepercaya turunan kelapa premium, kami menghadirkan kualitas konsisten, sumber daya berkelanjutan, dan produksi berskala besar untuk pembeli global. Jajaran produk kami mencakup cocopeat, serat kelapa, arang tempurung kelapa, kelapa parut kering, dan lainnya -- dibuat sesuai standar internasional."}, "subtitle": {"id": "Turunan kelapa premium: cocopeat, serat kelapa, arang kelapa, kelapa parut kering, dan lainnya -- dibuat sesuai standar internasional."}}'
 );
 
 -- About Section
-INSERT INTO about_section (id, title, mission, vision, values, hero_image_url)
+INSERT INTO about_section (id, title, mission, vision, values, hero_image_url, translations)
 VALUES (
   1,
   'About PT Agro Nusa Sejahtera',
   'To provide sustainable, high-quality coconut-derived products for global agriculture, industry, and household needs through responsible sourcing and innovative processing.',
   'To be the world''s most trusted and innovative coconut derivatives supplier, driving sustainability from coconut farms to global markets.',
-  '[{"icon": "leaf", "title": "Sustainability", "description": "Zero-waste coconut processing from husk to finished product"}, {"icon": "shield", "title": "Quality", "description": "International standard quality control across all product lines"}, {"icon": "users", "title": "Partnership", "description": "Long-term relationships with growers and global buyers"}, {"icon": "globe", "title": "Global Reach", "description": "Exporting coconut derivatives to worldwide markets"}, {"icon": "clock", "title": "Experience", "description": "4+ years of expertise in coconut derivative industry"}]',
-  'https://picsum.photos/seed/about-hero/1600/900'
+  '[{"icon": "leaf", "title": {"en": "Sustainability", "id": "Keberlanjutan"}, "description": {"en": "Zero-waste coconut processing from husk to finished product", "id": "Pengolahan kelapa tanpa limbah dari sabut hingga produk jadi"}}, {"icon": "shield", "title": {"en": "Quality", "id": "Kualitas"}, "description": {"en": "International standard quality control across all product lines", "id": "Kontrol kualitas standar internasional di semua lini produk"}}, {"icon": "users", "title": {"en": "Partnership", "id": "Kemitraan"}, "description": {"en": "Long-term relationships with growers and global buyers", "id": "Hubungan jangka panjang dengan petani dan pembeli global"}}, {"icon": "globe", "title": {"en": "Global Reach", "id": "Jangkauan Global"}, "description": {"en": "Exporting coconut derivatives to worldwide markets", "id": "Mengekspor turunan kelapa ke pasar dunia"}}, {"icon": "clock", "title": {"en": "Experience", "id": "Pengalaman"}, "description": {"en": "4+ years of expertise in coconut derivative industry", "id": "4+ tahun keahlian di industri turunan kelapa"}}]',
+  'https://picsum.photos/seed/about-hero/1600/900',
+  '{"title": {"id": "Tentang PT Agro Nusa Sejahtera"}, "mission": {"id": "Menyediakan produk turunan kelapa yang berkelanjutan dan berkualitas tinggi untuk kebutuhan pertanian, industri, dan rumah tangga global melalui sumber daya yang bertanggung jawab dan pengolahan inovatif."}, "vision": {"id": "Menjadi pemasok turunan kelapa paling tepercaya dan inovatif di dunia, mendorong keberlanjutan dari perkebunan kelapa hingga pasar global."}}'
 );
 
 -- Company Info
@@ -251,62 +258,69 @@ VALUES (
 -- Video: https://pub-<hash>.r2.dev/products/{slug}-demo.mp4
 
 -- Products: Cocopeat
-INSERT INTO products (name, category, slug, short_description, thumbnail, video_url, media, specifications, applications, sort_order) VALUES
+INSERT INTO products (name, category, slug, short_description, thumbnail, video_url, media, specifications, applications, sort_order, translations) VALUES
 ('Cocopeat Block 5kg', 'cocopeat', 'cocopeat-block-5kg', 'Premium compressed cocopeat block for professional horticulture and agriculture',
  'https://picsum.photos/seed/cocopeat-block-5kg/400/300',
  NULL,
  '[{"type": "image", "url": "https://picsum.photos/seed/cocopeat-block-5kg-1/800/600"}, {"type": "image", "url": "https://picsum.photos/seed/cocopeat-block-5kg-2/800/600"}]',
- '[{"name": "Weight", "value": "5 kg"}, {"name": "Expansion", "value": "15-18 L/kg"}, {"name": "EC", "value": "< 0.5", "unit": "mS/cm"}, {"name": "pH", "value": "5.5 - 6.5"}, {"name": "Moisture", "value": "< 15", "unit": "%"}, {"name": "Organic Matter", "value": "> 95", "unit": "%"}]',
- '{"Professional horticulture", "Greenhouse growing", "Soil amendment", "Seed starting"}', 1),
+ '[{"name": {"en": "Weight", "id": "Berat"}, "value": {"en": "5 kg", "id": "5 kg"}}, {"name": {"en": "Expansion", "id": "Pengembangan"}, "value": {"en": "15-18 L/kg", "id": "15-18 L/kg"}}, {"name": {"en": "EC", "id": "EC"}, "value": {"en": "< 0.5", "id": "< 0.5"}, "unit": "mS/cm"}, {"name": {"en": "pH", "id": "pH"}, "value": {"en": "5.5 - 6.5", "id": "5.5 - 6.5"}}, {"name": {"en": "Moisture", "id": "Kelembaban"}, "value": {"en": "< 15", "id": "< 15"}, "unit": "%"}, {"name": {"en": "Organic Matter", "id": "Bahan Organik"}, "value": {"en": "> 95", "id": "> 95"}, "unit": "%"}]',
+ '["Professional horticulture", "Greenhouse growing", "Soil amendment", "Seed starting"]', 1,
+ '{"name": {"id": "Blok Cocopeat 5kg"}, "short_description": {"id": "Blok cocopeat padat premium untuk hortikultura dan pertanian profesional"}}'),
 ('Cocopeat Briquette 650g', 'cocopeat', 'cocopeat-briquette-650g', 'Compact cocopeat briquette ideal for home gardening and retail',
  'https://picsum.photos/seed/cocopeat-briquette-650g/400/300',
  NULL,
  '[{"type": "image", "url": "https://picsum.photos/seed/cocopeat-briquette-650g/800/600"}]',
- '[{"name": "Weight", "value": "650g"}, {"name": "Expansion", "value": "8-10 L"}, {"name": "EC", "value": "< 0.5", "unit": "mS/cm"}, {"name": "pH", "value": "5.5 - 6.5"}]',
- '{"Home gardening", "Retail consumer", "Seed starting", "Potting mix"}', 2),
+ '[{"name": {"en": "Weight", "id": "Berat"}, "value": {"en": "650g", "id": "650g"}}, {"name": {"en": "Expansion", "id": "Pengembangan"}, "value": {"en": "8-10 L", "id": "8-10 L"}}, {"name": {"en": "EC", "id": "EC"}, "value": {"en": "< 0.5", "id": "< 0.5"}, "unit": "mS/cm"}, {"name": {"en": "pH", "id": "pH"}, "value": {"en": "5.5 - 6.5", "id": "5.5 - 6.5"}}]',
+ '["Home gardening", "Retail consumer", "Seed starting", "Potting mix"]', 2,
+ '{"name": {"id": "Briket Cocopeat 650g"}, "short_description": {"id": "Briket cocopeat ringkas ideal untuk berkebun rumahan dan ritel"}}'),
 ('Cocopeat Grow Bag 100L', 'cocopeat', 'cocopeat-growbag-100l', 'Ready-to-use cocopeat grow bag for commercial greenhouse production',
  'https://picsum.photos/seed/cocopeat-growbag-100l/400/300',
  NULL,
  '[{"type": "image", "url": "https://picsum.photos/seed/cocopeat-growbag-100l-1/800/600"}, {"type": "video", "url": "https://flow-content.google/video/bf26c7ce-46c6-4a42-9d05-413b98eb1422?Expires=1785400442&KeyName=labs-flow-prod-cdn-key&Signature=Pk0jc9ZASnp2-FlaylWOuy_RqLY"}]',
- '[{"name": "Volume", "value": "100 L"}, {"name": "EC", "value": "< 0.8", "unit": "mS/cm"}, {"name": "pH", "value": "5.5 - 6.5"}, {"name": "Pre-buffered", "value": "Yes"}]',
- '{"Greenhouse tomatoes", "Cucumber", "Pepper", "Strawberry cultivation"}', 3);
+ '[{"name": {"en": "Volume", "id": "Volume"}, "value": {"en": "100 L", "id": "100 L"}}, {"name": {"en": "EC", "id": "EC"}, "value": {"en": "< 0.8", "id": "< 0.8"}, "unit": "mS/cm"}, {"name": {"en": "pH", "id": "pH"}, "value": {"en": "5.5 - 6.5", "id": "5.5 - 6.5"}}, {"name": {"en": "Pre-buffered", "id": "Pra-buffer"}, "value": {"en": "Yes", "id": "Ya"}}]',
+ '["Greenhouse tomatoes", "Cucumber", "Pepper", "Strawberry cultivation"]', 3,
+ '{"name": {"id": "Kantong Tanam Cocopeat 100L"}, "short_description": {"id": "Kantong tanam cocopeat siap pakai untuk produksi rumah kaca komersial"}}');
 
 -- Products: Cocofiber
-INSERT INTO products (name, category, slug, short_description, thumbnail, video_url, media, specifications, applications, sort_order) VALUES
+INSERT INTO products (name, category, slug, short_description, thumbnail, video_url, media, specifications, applications, sort_order, translations) VALUES
 ('Cocofiber Bale 100kg', 'cocofiber', 'cocofiber-bale-100kg', 'Premium natural coconut fiber for industrial and horticultural applications',
  'https://picsum.photos/seed/cocofiber-bale-100kg/400/300',
  NULL,
  '[{"type": "image", "url": "https://picsum.photos/seed/cocofiber-bale-100kg-1/800/600"}, {"type": "video", "url": "https://flow-content.google/video/bf26c7ce-46c6-4a42-9d05-413b98eb1422?Expires=1785400442&KeyName=labs-flow-prod-cdn-key&Signature=Pk0jc9ZASnp2-FlaylWOuy_RqLY"}]',
- '[{"name": "Fiber Length", "value": "15-25 cm"}, {"name": "Moisture", "value": "12-15", "unit": "%"}, {"name": "Impurities", "value": "< 2", "unit": "%"}, {"name": "Color", "value": "Golden Brown"}]',
- '{"Mattress filling", "Upholstery", "Erosion control mats", "Geotextiles"}', 4),
+ '[{"name": {"en": "Fiber Length", "id": "Panjang Serat"}, "value": {"en": "15-25 cm", "id": "15-25 cm"}}, {"name": {"en": "Moisture", "id": "Kelembaban"}, "value": {"en": "12-15", "id": "12-15"}, "unit": "%"}, {"name": {"en": "Impurities", "id": "Kotoran"}, "value": {"en": "< 2", "id": "< 2"}, "unit": "%"}, {"name": {"en": "Color", "id": "Warna"}, "value": {"en": "Golden Brown", "id": "Coklat Keemasan"}}]',
+ '["Mattress filling", "Upholstery", "Erosion control mats", "Geotextiles"]', 4,
+ '{"name": {"id": "Bal Cocofiber 100kg"}, "short_description": {"id": "Serat kelapa alami premium untuk aplikasi industri dan hortikultura"}}'),
 ('Cocofiber Rope 16mm', 'cocofiber', 'cocofiber-rope-16mm', 'Natural biodegradable cocofiber rope for landscaping and decoration',
  'https://picsum.photos/seed/cocofiber-rope-16mm/400/300',
  NULL,
  '[{"type": "image", "url": "https://picsum.photos/seed/cocofiber-rope-16mm/800/600"}]',
- '[{"name": "Diameter", "value": "16mm"}, {"name": "Material", "value": "100% Natural Cocofiber"}, {"name": "Biodegradable", "value": "Yes"}, {"name": "Tensile Strength", "value": "High"}]',
- '{"Gardening", "Landscaping", "Decoration", "Erosion control"}', 5),
+ '[{"name": {"en": "Diameter", "id": "Diameter"}, "value": {"en": "16mm", "id": "16mm"}}, {"name": {"en": "Material", "id": "Bahan"}, "value": {"en": "100% Natural Cocofiber", "id": "100% Cocofiber Alami"}}, {"name": {"en": "Biodegradable", "id": "Terurai Alami"}, "value": {"en": "Yes", "id": "Ya"}}, {"name": {"en": "Tensile Strength", "id": "Kekuatan Tarik"}, "value": {"en": "High", "id": "Tinggi"}}]',
+ '["Gardening", "Landscaping", "Decoration", "Erosion control"]', 5,
+ '{"name": {"id": "Tali Cocofiber 16mm"}, "short_description": {"id": "Tali cocofiber alami yang dapat terurai untuk lanskap dan dekorasi"}}'),
 ('Cocofiber Erosion Control Mat 2m x 50m', 'cocofiber', 'cocofiber-mat-2m', 'Biodegradable erosion control blanket for slope protection and revegetation',
  'https://picsum.photos/seed/cocofiber-mat-2m/400/300',
  NULL,
  '[{"type": "image", "url": "https://picsum.photos/seed/cocofiber-mat-2m/800/600"}]',
- '[{"name": "Width", "value": "2m"}, {"name": "Length", "value": "50m"}, {"name": "Material", "value": "100% Natural Cocofiber"}, {"name": "Biodegradable", "value": "100%"}]',
- '{"Slope protection", "Revegetation", "Landscaping", "Mining reclamation"}', 6);
+ '[{"name": {"en": "Width", "id": "Lebar"}, "value": {"en": "2m", "id": "2m"}}, {"name": {"en": "Length", "id": "Panjang"}, "value": {"en": "50m", "id": "50m"}}, {"name": {"en": "Material", "id": "Bahan"}, "value": {"en": "100% Natural Cocofiber", "id": "100% Cocofiber Alami"}}, {"name": {"en": "Biodegradable", "id": "Terurai Alami"}, "value": {"en": "100%", "id": "100%"}}]',
+ '["Slope protection", "Revegetation", "Landscaping", "Mining reclamation"]', 6,
+ '{"name": {"id": "Tikar Pengendali Erosi Cocofiber 2m x 50m"}, "short_description": {"id": "Selimut pengendali erosi yang dapat terurai untuk perlindungan lereng dan revegetasi"}}');
 
 -- Gallery Section
-INSERT INTO gallery_section (id, title, description)
+INSERT INTO gallery_section (id, title, description, translations)
 VALUES (
   1,
   'Our Facilities',
-  'A look inside our production, quality control, and team.'
+  'A look inside our production, quality control, and team.',
+  '{"title": {"id": "Fasilitas Kami"}, "description": {"id": "Melihat langsung proses produksi, kontrol kualitas, dan tim kami."}}'
 );
 
 -- Gallery Items (using picsum.photos placeholder images)
-INSERT INTO gallery_items (category, title, description, image, thumbnail, type, sort_order) VALUES
-('production', 'Cocopeat Block Production', 'Premium compressed cocopeat blocks ready for export', 'https://picsum.photos/seed/gallery-production-1/1200/800', 'https://picsum.photos/seed/gallery-production-1-thumb/400/300', 'image', 1),
-('production', 'Cocofiber Processing Line', 'Natural coconut fiber processing and grading', 'https://picsum.photos/seed/gallery-production-2/1200/800', 'https://picsum.photos/seed/gallery-production-2-thumb/400/300', 'image', 2),
-('factory', 'Our Facility', 'Production facility in Pekanbaru, Riau', 'https://picsum.photos/seed/gallery-facility/1200/800', 'https://picsum.photos/seed/gallery-facility-thumb/400/300', 'image', 3),
-('factory', 'Warehouse & Storage', 'Climate-controlled storage for coconut derivatives', 'https://picsum.photos/seed/gallery-warehouse/1200/800', 'https://picsum.photos/seed/gallery-warehouse-thumb/400/300', 'image', 4),
-('certifications', 'Export Documentation', 'Export documentation and international trade compliance', 'https://picsum.photos/seed/gallery-cert/1200/800', 'https://picsum.photos/seed/gallery-cert-thumb/400/300', 'image', 5),
-('production', 'Packaging & Quality Control', 'Best packaging practices to maintain product quality and cleanliness', 'https://picsum.photos/seed/gallery-packing/1200/800', 'https://picsum.photos/seed/gallery-packing-thumb/400/300', 'image', 6),
-('production', 'Coconut Raw Materials', 'Selected mature coconuts for premium derivative production', 'https://picsum.photos/seed/gallery-raw/1200/800', 'https://picsum.photos/seed/gallery-raw-thumb/400/300', 'image', 7),
-('factory', 'Export Shipment', 'Container loading for international shipment', 'https://picsum.photos/seed/gallery-export/1200/800', 'https://picsum.photos/seed/gallery-export-thumb/400/300', 'image', 8);
+INSERT INTO gallery_items (category, title, description, image, thumbnail, type, sort_order, translations) VALUES
+('production', 'Cocopeat Block Production', 'Premium compressed cocopeat blocks ready for export', 'https://picsum.photos/seed/gallery-production-1/1200/800', 'https://picsum.photos/seed/gallery-production-1-thumb/400/300', 'image', 1, '{"title": {"id": "Produksi Blok Cocopeat"}, "description": {"id": "Blok cocopeat padat premium siap ekspor"}}'),
+('production', 'Cocofiber Processing Line', 'Natural coconut fiber processing and grading', 'https://picsum.photos/seed/gallery-production-2/1200/800', 'https://picsum.photos/seed/gallery-production-2-thumb/400/300', 'image', 2, '{"title": {"id": "Lini Pengolahan Cocofiber"}, "description": {"id": "Pengolahan dan sortasi serat kelapa alami"}}'),
+('factory', 'Our Facility', 'Production facility in Pekanbaru, Riau', 'https://picsum.photos/seed/gallery-facility/1200/800', 'https://picsum.photos/seed/gallery-facility-thumb/400/300', 'image', 3, '{"title": {"id": "Fasilitas Kami"}, "description": {"id": "Fasilitas produksi di Pekanbaru, Riau"}}'),
+('factory', 'Warehouse & Storage', 'Climate-controlled storage for coconut derivatives', 'https://picsum.photos/seed/gallery-warehouse/1200/800', 'https://picsum.photos/seed/gallery-warehouse-thumb/400/300', 'image', 4, '{"title": {"id": "Gudang & Penyimpanan"}, "description": {"id": "Penyimpanan turunan kelapa dengan pengatur suhu"}}'),
+('certifications', 'Export Documentation', 'Export documentation and international trade compliance', 'https://picsum.photos/seed/gallery-cert/1200/800', 'https://picsum.photos/seed/gallery-cert-thumb/400/300', 'image', 5, '{"title": {"id": "Dokumentasi Ekspor"}, "description": {"id": "Dokumentasi ekspor dan kepatuhan perdagangan internasional"}}'),
+('production', 'Packaging & Quality Control', 'Best packaging practices to maintain product quality and cleanliness', 'https://picsum.photos/seed/gallery-packing/1200/800', 'https://picsum.photos/seed/gallery-packing-thumb/400/300', 'image', 6, '{"title": {"id": "Pengemasan & Kontrol Kualitas"}, "description": {"id": "Praktik pengemasan terbaik untuk menjaga kualitas dan kebersihan produk"}}'),
+('production', 'Coconut Raw Materials', 'Selected mature coconuts for premium derivative production', 'https://picsum.photos/seed/gallery-raw/1200/800', 'https://picsum.photos/seed/gallery-raw-thumb/400/300', 'image', 7, '{"title": {"id": "Bahan Baku Kelapa"}, "description": {"id": "Kelapa matang terpilih untuk produksi turunan premium"}}'),
+('factory', 'Export Shipment', 'Container loading for international shipment', 'https://picsum.photos/seed/gallery-export/1200/800', 'https://picsum.photos/seed/gallery-export-thumb/400/300', 'image', 8, '{"title": {"id": "Pengiriman Ekspor"}, "description": {"id": "Pemuatan kontainer untuk pengiriman internasional"}}');

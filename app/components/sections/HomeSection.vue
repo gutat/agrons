@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { useSupabase } from "~/utils/supabase";
+import { useI18n } from "vue-i18n";
+import { useContent } from "~/composables/useContent";
 import Section from "~/components/common/Section.vue";
 import RotatingText from "~/components/bits/RotatingText.vue";
 import BlurText from "~/components/bits/BlurText.vue";
 import SplitText from "~/components/bits/SplitText.vue";
 import StarBorder from "~/components/bits/StarBorder.vue";
 import ShinyText from "~/components/bits/ShinyText.vue";
+
+const { t, tm } = useI18n({ useScope: "global" });
+const { contentText } = useContent();
+// tm() returns the raw message (an array here) — t() only resolves strings
+const heroWords = computed(() => (tm("hero.words") as unknown) as string[]);
 
 const supabase = useSupabase();
 
@@ -36,18 +43,22 @@ onMounted(() => {
 });
 
 onMounted(async () => {
-    const { data } = await supabase
-        .from("home_section")
-        .select(
-            "company_name, tagline, description, subtitle, hero_video_url, hero_image_url",
-        )
-        .eq("published", true)
-        .single();
-  if (data) section.value = { ...section.value, ...data };
-  console.log("Data section:", section.value);
-  console.log("hero_video_url:", section.value.hero_video_url);
-  console.log("supportsVideo:", supportsVideo.value); // Perhatikan .value karena ini ref
-  console.log("readyToPlay:", readyToPlay.value);
+    try {
+        const { data, error } = await supabase
+            .from("home_section")
+            .select(
+                "company_name, tagline, description, subtitle, hero_video_url, hero_image_url, translations",
+            )
+            .eq("published", true)
+            .maybeSingle();
+        if (error) {
+            console.error("home_section load failed:", error);
+        } else if (data) {
+            section.value = { ...section.value, ...data };
+        }
+    } catch (e) {
+        console.error("home_section load failed:", e);
+    }
 });
 </script>
 
@@ -113,7 +124,7 @@ onMounted(async () => {
             >
                 <div class="mb-3">
                     <SplitText
-                        text="01 &mdash; Home"
+                        :text="$t('sections.home')"
                         className="section-number block text-[11px]"
                         :delay="80"
                         :duration="0.5"
@@ -132,7 +143,7 @@ onMounted(async () => {
                     class="max-w-3xl mx-auto animate-entry delay-1 text-center"
                 >
                     <ShinyText
-                        :text="section.tagline"
+                        :text="contentText(section, 'tagline')"
                         :speed="2"
                         color="rgba(255,255,255,0.7)"
                         shine-color="var(--color-husk-light)"
@@ -142,8 +153,8 @@ onMounted(async () => {
                     />
 
                     <BlurText
-                        v-if="section.description"
-                        :text="section.description"
+                        v-if="contentText(section, 'description')"
+                        :text="contentText(section, 'description')"
                         className="!text-white/90 body-lg leading-relaxed max-w-xl mx-auto mt-4"
                         :delay="100"
                         :step-duration="0.3"
@@ -155,7 +166,7 @@ onMounted(async () => {
                         class="display-lg mt-4 md:mt-10 mb-2 md:mb-4 leading-[1.08] home-headline flex justify-center items-center"
                     >
                         <SplitText
-                            text="Premium"
+                            :text="$t('hero.premium')"
                             tag="span"
                             className="inline text-white tracking-wide opacity-80 mr-2"
                             split-type="chars"
@@ -169,11 +180,7 @@ onMounted(async () => {
                             text-align="left"
                         />
                             <RotatingText
-                                :texts="[
-                                    'Cocopeat',
-                                    'Cocofiber',
-                                    'Derivatives',
-                                ]"
+                                :texts="heroWords"
                                 :rotation-interval="2800"
                                 split-by="characters"
                                 :stagger-duration="0.035"
@@ -191,7 +198,7 @@ onMounted(async () => {
                             />
                     </h1>
                     <SplitText
-                        text="from Indonesia"
+                        :text="$t('hero.fromIndonesia')"
                         tag="span"
                         className="inline text-white tracking-wide"
                         split-type="chars"
@@ -218,7 +225,7 @@ onMounted(async () => {
                             <span
                                 class="flex items-center gap-2 text-sm font-bold"
                             >
-                                Our Products
+                                {{ $t('hero.ourProducts') }}
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="16"
