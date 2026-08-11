@@ -7,7 +7,7 @@ import GallerySection from '~/components/sections/GallerySection.vue'
 import ContactSection from '~/components/sections/ContactSection.vue'
 
 useHead({
-  title: 'PT Agro Nusa Sejahtera',
+  title: 'PT Agro Sentra Nusa',
   meta: [
     { name: 'description', content: 'Premium Cocopeat and Cocofiber Products from Indonesia' },
     { property: 'og:title', content: 'PT Agro Nusa Sejahtera' },
