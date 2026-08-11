@@ -9,9 +9,9 @@ import ContactSection from '~/components/sections/ContactSection.vue'
 useHead({
   title: 'PT Agro Sentra Nusa',
   meta: [
-    { name: 'description', content: 'Premium Cocopeat and Cocofiber Products from Indonesia' },
-    { property: 'og:title', content: 'PT Agro Nusa Sejahtera' },
-    { property: 'og:description', content: 'Premium Cocopeat and Cocofiber from Indonesia' },
+    { name: 'description', content: 'Premium Cocopeat and Cocofiber Products dari Indonesia' },
+    { property: 'og:title', content: 'PT Agro Sentra Nusa' },
+    { property: 'og:description', content: 'Premium Cocopeat and Cocofiber dari Indonesia' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
   ],
